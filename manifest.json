@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-vlc-notes",
 	"name": "VLC Notes",
-	"version": "0.0.11",
+	"version": "0.0.12",
 	"minAppVersion": "0.15.0",
 	"description": "It allows you to control VLC Player via Obsidian and add a timestamped link or snapshot from the current video to your note. By clicking on these timestamped links, you can reopen the video at the specified time in VLC Player. At the same time, you can work with your friends simultaneously by opening VLC with the arguments provided by the plugin to the Syncplay program.",
 	"author": "zuluwi",
