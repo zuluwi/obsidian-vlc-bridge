@@ -11,7 +11,7 @@ export default class VLCNotesPlugin extends Plugin {
   sendVlcRequest: (command: string) => Promise<RequestUrlResponse | undefined>;
   getStatus: () => Promise<RequestUrlResponse>;
   getCurrentVideo: () => Promise<string | null>;
-  vlcExecOptions: string[];
+  vlcExecOptions: () => string[];
   async onload() {
     await this.loadSettings();
     var { getStatus, getCurrentVideo, checkPort, sendVlcRequest, openVideo, launchVLC, vlcExecOptions } = passPlugin(this);
@@ -22,15 +22,18 @@ export default class VLCNotesPlugin extends Plugin {
     this.vlcExecOptions = vlcExecOptions;
 
     // This creates an icon in the left ribbon.
-    this.addRibbonIcon("dice", "Sample Plugin", (evt: MouseEvent) => {
+    this.addRibbonIcon("lucide-traffic-cone", t("Select a file to open with VLC Player"), (evt: MouseEvent) => {
       this.fileOpen();
     });
 
     this.registerObsidianProtocolHandler("vlcNotes", (params: ObsidianProtocolData) => {
-      var { videoPath, timestamp } = params;
-      videoPath = decodeURIComponent(videoPath);
+      var { mediaPath, timestamp } = params;
+      if (!mediaPath) {
+        return new Notice(t("The link does not have a 'mediaPath' parameter to play"));
+      }
+      mediaPath = decodeURIComponent(mediaPath);
       var time = Number(timestamp);
-      this.openVideo(videoPath, time);
+      this.openVideo(mediaPath, time);
     });
 
     this.addCommand({
@@ -50,7 +53,7 @@ export default class VLCNotesPlugin extends Plugin {
         }
         var currentTime = currentStats.json.time;
         var timestamp = this.secondsToTimestamp(currentTime);
-        editor.replaceSelection(`[${timestamp}](obsidian://vlcNotes?videoPath=${encodeURIComponent(currentFile)}&timestamp=${currentTime}) `);
+        editor.replaceSelection(`[${timestamp}](obsidian://vlcNotes?mediaPath=${encodeURIComponent(currentFile)}&timestamp=${currentTime}) `);
       },
     });
 
@@ -138,7 +141,7 @@ export default class VLCNotesPlugin extends Plugin {
                 editor.replaceSelection(
                   `${
                     currentFile
-                      ? `[${this.secondsToTimestamp(response.json.time)}](obsidian://vlcNotes?videoPath=${encodeURIComponent(currentFile)}&timestamp=${response.json.time})`
+                      ? `[${this.secondsToTimestamp(response.json.time)}](obsidian://vlcNotes?mediaPath=${encodeURIComponent(currentFile)}&timestamp=${response.json.time})`
                       : `${this.secondsToTimestamp(response.json.time)}`
                   } ![](${snapshot.path})\n`
                 );
@@ -164,6 +167,10 @@ export default class VLCNotesPlugin extends Plugin {
     return new Date(seconds * 1000).toISOString().slice(seconds < 3600 ? 14 : 11, 19);
   }
   async fileOpen() {
+    if (!this.settings.vlcPath) {
+      return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
+    }
+
     const input = document.createElement("input");
     input.setAttribute("type", "file");
     input.accept = "video/*, audio/*, .mpd, .flv, .mkv";

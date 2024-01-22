@@ -1,5 +1,6 @@
 // Türkçe
 export default {
+  "The link does not have a 'mediaPath' parameter to play": "Linkte, oynatmak için bir 'mediaPath' girdisi bulunmamakta",
   "Paste timestamped link of current video": "Mevcut videonun zaman damgalı linkini yapıştır",
   "VLC Player must be open to use this command": "Bu komutu kullanabilmek için VLC Player'ın açık olması gerekmektedir",
   "No video information available": "Mevcut video bilgisine ulaşılamadı",
@@ -44,6 +45,13 @@ export default {
   "Copy VLC Web Interface link": "VLC Web Interface linkini kopyala",
   "Copy command line code": "Komut satırı kodunu kopyala",
   "Copy arguments for starting VLC (for Syncplay)": "VLC'yi başlatma argümanlarını kopyala (Syncplay için)",
+  "Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)":
+    "Not: Eğer `--snapshot-path` seçeneği boşluk içeriyorsa snapshot komutu çalışmayacaktır (bu sadece Syncplay argümanları için geçerlidir)",
   "Copy to clipboard": "Panoya kopyala",
   "Copied to clipboard": "Panoya kopyalandı",
+
+  /* vlcHelpers*/
+  "Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings": "Plugini kullanabilmek için önce plugin ayarlarından 'vlc.exe'yi seçmeniz gerekmekte",
+  "Could not connect to VLC Player.": "VLC Player'a bağlanılamadı.",
+  "The vlc.exe specified in the settings could not be run, please check again!": "Ayarlarda belirtilen vlc.exe çalıştırılamadı, lütfen tekrar kontrol ediniz!",
 };

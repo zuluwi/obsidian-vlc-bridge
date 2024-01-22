@@ -1,5 +1,6 @@
 // English
 export default {
+  "The link does not have a 'mediaPath' parameter to play": "The link does not have a 'mediaPath' parameter to play",
   "Paste timestamped link of current video": "Paste timestamped link of current video",
   "VLC Player must be open to use this command": "VLC Player must be open to use this command",
   "No video information available": "No video information available",
@@ -44,6 +45,13 @@ export default {
   "Copy VLC Web Interface link": "Copy VLC Web Interface link",
   "Copy command line code": "Copy command line code",
   "Copy arguments for starting VLC (for Syncplay)": "Copy arguments for starting VLC (for Syncplay)",
+  "Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)":
+    "Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)",
   "Copy to clipboard": "Copy to clipboard",
   "Copied to clipboard": "Copied to clipboard",
+
+  /* vlcHelpers*/
+  "Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings": "Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings",
+  "Could not connect to VLC Player.": "Could not connect to VLC Player.",
+  "The vlc.exe specified in the settings could not be run, please check again!": "The vlc.exe specified in the settings could not be run, please check again!",
 };

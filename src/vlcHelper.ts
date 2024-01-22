@@ -3,6 +3,7 @@ const exec = util.promisify(require("child_process").exec);
 
 import { Notice, RequestUrlResponse, request, requestUrl } from "obsidian";
 import VLCNotesPlugin from "./main";
+import { t } from "./language/helpers";
 
 interface config {
   port: number | null;
@@ -57,7 +58,7 @@ export function passPlugin(plugin: VLCNotesPlugin) {
         });
       if (timeout) {
         checkInterval = setInterval(async () => {
-          await requestUrl(`http://:${password_}@localhost:${port_}/requests/playlist.json`)
+          requestUrl(`http://:${password_}@localhost:${port_}/requests/playlist.json`)
             .then((response) => {
               if (response.status == 200) {
                 clearInterval(checkInterval);
@@ -92,7 +93,7 @@ export function passPlugin(plugin: VLCNotesPlugin) {
         })
         .catch((err) => {
           console.log("vlc request error:", err);
-          new Notice("VLC Player aktif değil.");
+          new Notice(t("Could not connect to VLC Player."));
           reject(err);
         });
     });
@@ -125,7 +126,7 @@ export function passPlugin(plugin: VLCNotesPlugin) {
         })
         .catch((err) => {
           console.log("vlc request error:", err);
-          new Notice("VLC Player aktif değil.");
+          new Notice(t("Could not connect to VLC Player."));
           reject(err);
         });
     });
@@ -202,11 +203,11 @@ export function passPlugin(plugin: VLCNotesPlugin) {
         requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
       }
     } else {
-      new Notice("VLC Player'a bağlanılamadı.");
+      new Notice(t("Could not connect to VLC Player."));
     }
   };
 
-  const vlcExecOptions = [
+  const vlcExecOptions = () => [
     `--extraintf=luaintf:http`,
     `--http-port=${plugin.settings.port}`,
     `--http-password=${plugin.settings.password}`,
@@ -220,12 +221,12 @@ export function passPlugin(plugin: VLCNotesPlugin) {
 
   const launchVLC = () => {
     if (!plugin.settings.vlcPath) {
-      return new Notice("Plugini kullanabilmek için önce plugin ayarlarından 'vlc.exe'yi seçmeniz gerekmekte");
+      return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
     }
     // console.log("launchVlc");
-    // console.log(`"${plugin.settings.vlcPath}" ${vlcExecOptions.join(" ")}`);
+    // console.log(`"${plugin.settings.vlcPath}" ${vlcExecOptions().join(" ")}`);
 
-    exec(`"${plugin.settings.vlcPath}" ${vlcExecOptions.join(" ")}`)
+    exec(`"${plugin.settings.vlcPath}" ${vlcExecOptions().join(" ")}`)
       .finally(() => {
         if (checkInterval) {
           clearInterval(checkInterval);
@@ -238,7 +239,7 @@ export function passPlugin(plugin: VLCNotesPlugin) {
           clearTimeout(checkTimeout);
         }
         console.log("VLC Launch Error", err);
-        new Notice("Ayarlarda belirtilen VLC.exe çalıştırılamadı, lütfen tekrar kontrol ediniz!");
+        new Notice(t("The vlc.exe specified in the settings could not be run, please check again!"));
       });
     currentConfig.vlcPath = plugin.settings.vlcPath;
     currentConfig.port = plugin.settings.port;

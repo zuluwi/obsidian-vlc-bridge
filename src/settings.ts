@@ -70,8 +70,10 @@ export class VNPluginSettingsTab extends PluginSettingTab {
     var copyArgEl: Setting;
     const setCopyBtnDesc = () => {
       copyUrlEl.setDesc(`http://:${this.plugin.settings.port}@localhost:${this.plugin.settings.password}/`);
-      copyCommandEl.setDesc(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions.join(" ")}`);
-      copyArgEl.setDesc(`${this.plugin.vlcExecOptions.join(" ")}`);
+      copyCommandEl.setDesc(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions().join(" ")}`);
+      copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`).descEl.createEl("div", {
+        text: t("Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)"),
+      });
     };
 
     var selectVLCDescEl: HTMLElement;
@@ -216,13 +218,13 @@ export class VNPluginSettingsTab extends PluginSettingTab {
     );
     copyCommandEl = new Setting(containerEl).setName(t("Copy command line code")).addButton((btn) =>
       btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-        await navigator.clipboard.writeText(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions.join(" ")}`);
+        await navigator.clipboard.writeText(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions().join(" ")}`);
         new Notice(t("Copied to clipboard"));
       })
     );
     copyArgEl = new Setting(containerEl).setName(t("Copy arguments for starting VLC (for Syncplay)")).addButton((btn) =>
       btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-        await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions.join(" ")}`);
+        await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ")}`);
         new Notice(t("Copied to clipboard"));
       })
     );
