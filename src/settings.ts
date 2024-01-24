@@ -1,9 +1,9 @@
 import { App, Notice, PluginSettingTab, Setting } from "obsidian";
-import VLCNotesPlugin from "./main";
+import VLCBridgePlugin from "./main";
 import { t } from "./language/helpers";
 import { currentConfig } from "./vlcHelper";
 
-export interface VNPluginSettings {
+export interface VBPluginSettings {
   port: number;
   password: string;
   snapshotPrefix: string;
@@ -18,7 +18,7 @@ export interface VNPluginSettings {
   pauseOnPasteSnapshot: boolean;
 }
 
-export const DEFAULT_SETTINGS: VNPluginSettings = {
+export const DEFAULT_SETTINGS: VBPluginSettings = {
   port: 1234,
   password: "vlcpassword",
   snapshotPrefix: "image",
@@ -33,16 +33,20 @@ export const DEFAULT_SETTINGS: VNPluginSettings = {
   pauseOnPasteSnapshot: false,
 };
 
-const snapshotExts = {
+const snapshotExts: {
+  png: "png";
+  jpg: "jpg";
+  tiff: "tiff";
+} = {
   png: "png",
   jpg: "jpg",
   tiff: "tiff",
 };
 
-export class VNPluginSettingsTab extends PluginSettingTab {
-  plugin: VLCNotesPlugin;
+export class VBPluginSettingsTab extends PluginSettingTab {
+  plugin: VLCBridgePlugin;
 
-  constructor(app: App, plugin: VLCNotesPlugin) {
+  constructor(app: App, plugin: VLCBridgePlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }

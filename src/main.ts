@@ -1,12 +1,12 @@
 import { App, Editor, MarkdownView, Modal, Notice, ObsidianProtocolData, Plugin, PluginSettingTab, RequestUrlResponse, RequestUrlResponsePromise, Setting } from "obsidian";
-import { DEFAULT_SETTINGS, VNPluginSettingsTab, VNPluginSettings } from "./settings";
+import { DEFAULT_SETTINGS, VBPluginSettingsTab, VBPluginSettings } from "./settings";
 import { passPlugin, currentConfig } from "./vlcHelper";
 import { t } from "./language/helpers";
 
 // Remember to rename these classes and interfaces!
 
-export default class VLCNotesPlugin extends Plugin {
-  settings: VNPluginSettings;
+export default class VLCBridgePlugin extends Plugin {
+  settings: VBPluginSettings;
   openVideo: (filePath: string, time?: number) => void;
   sendVlcRequest: (command: string) => Promise<RequestUrlResponse | undefined>;
   getStatus: () => Promise<RequestUrlResponse>;
@@ -26,7 +26,7 @@ export default class VLCNotesPlugin extends Plugin {
       this.fileOpen();
     });
 
-    this.registerObsidianProtocolHandler("vlcNotes", (params: ObsidianProtocolData) => {
+    this.registerObsidianProtocolHandler("vlcBridge", (params: ObsidianProtocolData) => {
       var { mediaPath, timestamp } = params;
       if (!mediaPath) {
         return new Notice(t("The link does not have a 'mediaPath' parameter to play"));
@@ -159,7 +159,7 @@ export default class VLCNotesPlugin extends Plugin {
     });
 
     // This adds a settings tab so the user can configure various aspects of the plugin
-    this.addSettingTab(new VNPluginSettingsTab(this.app, this));
+    this.addSettingTab(new VBPluginSettingsTab(this.app, this));
   }
 
   onunload() {}

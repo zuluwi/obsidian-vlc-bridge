@@ -2,7 +2,7 @@ const util = require("util");
 const exec = util.promisify(require("child_process").exec);
 
 import { Notice, RequestUrlResponse, request, requestUrl } from "obsidian";
-import VLCNotesPlugin from "./main";
+import VLCBridgePlugin from "./main";
 import { t } from "./language/helpers";
 
 interface config {
@@ -28,7 +28,7 @@ export const currentConfig: config = {
 var checkTimeout: ReturnType<typeof setTimeout>;
 var checkInterval: ReturnType<typeof setInterval>;
 
-export function passPlugin(plugin: VLCNotesPlugin) {
+export function passPlugin(plugin: VLCBridgePlugin) {
   const getStatus = async () => {
     var port_ = currentConfig.port || plugin.settings.port;
     var password_ = currentConfig.password || plugin.settings.password;
