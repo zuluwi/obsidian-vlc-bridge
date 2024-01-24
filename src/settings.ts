@@ -14,6 +14,7 @@ export interface VBPluginSettings {
   lang: string;
   normalSeek: number;
   largeSeek: number;
+  alwaysOnTop: boolean;
   pauseOnPasteLink: boolean;
   pauseOnPasteSnapshot: boolean;
 }
@@ -29,6 +30,7 @@ export const DEFAULT_SETTINGS: VBPluginSettings = {
   lang: "en",
   normalSeek: 5,
   largeSeek: 60,
+  alwaysOnTop: true,
   pauseOnPasteLink: false,
   pauseOnPasteSnapshot: false,
 };
@@ -75,9 +77,9 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     const setCopyBtnDesc = () => {
       copyUrlEl.setDesc(`http://:${this.plugin.settings.port}@localhost:${this.plugin.settings.password}/`);
       copyCommandEl.setDesc(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions().join(" ")}`);
-      copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`).descEl.createEl("div", {
-        text: t("Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)"),
-      });
+      // copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`).descEl.createEl("div", {
+      //   text: t("Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)"),
+      // });
     };
 
     var selectVLCDescEl: HTMLElement;
@@ -127,6 +129,13 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           })
       );
 
+    new Setting(containerEl).setName(t("Always show VLC Player on top")).addToggle((toggle) => {
+      toggle.setValue(this.plugin.settings.alwaysOnTop).onChange(async (value) => {
+        this.plugin.settings.alwaysOnTop = value;
+        await this.plugin.saveSettings();
+        setCopyBtnDesc();
+      });
+    });
     new Setting(containerEl).setName(t("Pause video while pasting timestamp")).addToggle((toggle) => {
       toggle.setValue(this.plugin.settings.pauseOnPasteLink).onChange((value) => {
         this.plugin.settings.pauseOnPasteLink = value;
@@ -226,12 +235,12 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         new Notice(t("Copied to clipboard"));
       })
     );
-    copyArgEl = new Setting(containerEl).setName(t("Copy arguments for starting VLC (for Syncplay)")).addButton((btn) =>
-      btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-        await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ")}`);
-        new Notice(t("Copied to clipboard"));
-      })
-    );
+    // copyArgEl = new Setting(containerEl).setName(t("Copy arguments for starting VLC (for Syncplay)")).addButton((btn) =>
+    //   btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
+    //     await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ")}`);
+    //     new Notice(t("Copied to clipboard"));
+    //   })
+    // );
     setCopyBtnDesc();
 
     //

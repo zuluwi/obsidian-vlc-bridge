@@ -217,6 +217,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     `--snapshot-format="${plugin.settings.snapshotExt}"`,
     `--snapshot-prefix="${plugin.settings.snapshotPrefix}-"`,
     `--drawable-hwnd=1`,
+    `${plugin.settings.alwaysOnTop ? "--video-on-top" : ""}`,
   ];
 
   const launchVLC = () => {

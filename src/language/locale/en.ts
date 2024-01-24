@@ -25,6 +25,7 @@ export default {
   Port: "Port",
   "Enter the port for the server that will be opened to control VLC Player": "Enter the port for the server that will be opened to control VLC Player",
   //
+  "Always show VLC Player on top": "Always show VLC Player on top",
   "Pause video while pasting timestamp": "Pause video while pasting timestamp",
   "Pause video while pasting snapshot": "Pause video while pasting snapshot",
   //
