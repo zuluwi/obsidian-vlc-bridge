@@ -53,7 +53,7 @@ export default class VLCBridgePlugin extends Plugin {
         }
         var currentTime = currentStats.json.time;
         var timestamp = this.secondsToTimestamp(currentTime);
-        editor.replaceSelection(`[${timestamp}](obsidian://vlcNotes?mediaPath=${encodeURIComponent(currentFile)}&timestamp=${currentTime}) `);
+        editor.replaceSelection(`[${timestamp}](obsidian://vlcBridge?mediaPath=${encodeURIComponent(currentFile)}&timestamp=${currentTime}) `);
       },
     });
 
@@ -69,6 +69,7 @@ export default class VLCBridgePlugin extends Plugin {
     this.addCommand({
       id: "vlc-normal-seek-forward",
       name: t("Seek forward"),
+      repeatable: true,
       callback: async () => {
         this.sendVlcRequest(`seek&val=+${this.settings.normalSeek}`);
       },
@@ -77,6 +78,7 @@ export default class VLCBridgePlugin extends Plugin {
     this.addCommand({
       id: "vlc-normal-seek-backward",
       name: t("Seek backward"),
+      repeatable: true,
       callback: async () => {
         this.sendVlcRequest(`seek&val=-${-this.settings.normalSeek}`);
       },
@@ -84,6 +86,7 @@ export default class VLCBridgePlugin extends Plugin {
     this.addCommand({
       id: "vlc-large-seek-forward",
       name: t("Long seek forward"),
+      repeatable: true,
       callback: async () => {
         this.sendVlcRequest(`seek&val=+${this.settings.largeSeek}`);
       },
@@ -92,6 +95,7 @@ export default class VLCBridgePlugin extends Plugin {
     this.addCommand({
       id: "vlc-large-seek-backward",
       name: t("Long seek backward"),
+      repeatable: true,
       callback: async () => {
         this.sendVlcRequest(`seek&val=-${-this.settings.largeSeek}`);
       },
@@ -141,7 +145,7 @@ export default class VLCBridgePlugin extends Plugin {
                 editor.replaceSelection(
                   `${
                     currentFile
-                      ? `[${this.secondsToTimestamp(response.json.time)}](obsidian://vlcNotes?mediaPath=${encodeURIComponent(currentFile)}&timestamp=${response.json.time})`
+                      ? `[${this.secondsToTimestamp(response.json.time)}](obsidian://vlcBridge?mediaPath=${encodeURIComponent(currentFile)}&timestamp=${response.json.time})`
                       : `${this.secondsToTimestamp(response.json.time)}`
                   } ![](${snapshot.path})\n`
                 );
@@ -174,10 +178,11 @@ export default class VLCBridgePlugin extends Plugin {
     const input = document.createElement("input");
     input.setAttribute("type", "file");
     input.accept = "video/*, audio/*, .mpd, .flv, .mkv";
-    input.onchange = (e: any) => {
-      var files = e.target.files;
+    input.onchange = (e: Event) => {
+      var files = (e.target as HTMLInputElement)?.files as FileList;
       for (let i = 0; i < files.length; i++) {
         var file = files[i];
+        // @ts-ignore
         var fileURI = new URL(file.path).href;
         // console.log(fileURI);
         this.openVideo(fileURI);

@@ -23,7 +23,8 @@ export default {
   "Select 'vlc.exe' from the folder where VLC Player is installed": "Select 'vlc.exe' from the folder where VLC Player is installed",
   "Select vlc.exe": "Select vlc.exe",
   Port: "Port",
-  "Enter the port for the server that will be opened to control VLC Player": "Enter the port for the server that will be opened to control VLC Player",
+  "Enter a port number between 1 and 65535 for the server that will be opened to control VLC Player":
+    "Enter a port number between 1 and 65535 for the server that will be opened to control VLC Player",
   //
   "Always show VLC Player on top": "Always show VLC Player on top",
   "Pause video while pasting timestamp": "Pause video while pasting timestamp",
@@ -48,6 +49,8 @@ export default {
   "Copy arguments for starting VLC (for Syncplay)": "Copy arguments for starting VLC (for Syncplay)",
   "Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)":
     "Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)",
+  "syncplay argument instructions":
+    "You will get an error when you open VLC with Syncplay because the Snapshot folder path contains spaces. To fix this, paste the arguments and click the **`Store configuration and run Syncplay`** button to start the program once and close it. The arguments will be saved in the **`syncplay.ini`** file where Syncplay is installed, open this file and merge the **`#1#`** in the *`perplayerarguments`* object into **`#2#`** and save the file. Then open Syncplay and run it.",
   "Copy to clipboard": "Copy to clipboard",
   "Copied to clipboard": "Copied to clipboard",
 

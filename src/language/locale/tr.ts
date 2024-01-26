@@ -23,7 +23,8 @@ export default {
   "Select 'vlc.exe' from the folder where VLC Player is installed": "VLC Player'ın kurulu olduğu klasörden vlc.exe'yi seçiniz",
   "Select vlc.exe": "vlc.exe'yi seç",
   Port: "Port",
-  "Enter the port for the server that will be opened to control VLC Player": "VLC Player'ı kontrol etmek için açılacak server için port giriniz",
+  "Enter a port number between 1 and 65535 for the server that will be opened to control VLC Player":
+    "VLC Player'ı kontrol etmeye yarayacak server için 1 ile 65535 arasında bir port numarası giriniz",
   //
   "Always show VLC Player on top": "VLC Player'ı her zaman üstte göster",
   "Pause video while pasting timestamp": "Zaman damgası yapıştırırken videoyu duraklat",
@@ -48,6 +49,8 @@ export default {
   "Copy arguments for starting VLC (for Syncplay)": "VLC'yi başlatma argümanlarını kopyala (Syncplay için)",
   "Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)":
     "Not: Eğer `--snapshot-path` seçeneği boşluk içeriyorsa snapshot komutu çalışmayacaktır (bu sadece Syncplay argümanları için geçerlidir)",
+  "syncplay argument instructions":
+    "Snapshot klasör yolu boşluk barındırdığı için Syncplay ile VLC'yi açtığınızda hata alacaksınız. Bunu düzeltmek için argümanları yapıştırıp **`Yapılandırmayı depolayın ve Syncplay'i çalıştırın`** butonuna tıklayarak bir kere başlatıp programı kapatın. Argümanlar Syncplay'in kurulu olduğu **`syncplay.ini`** dosyasına kaydedilmiş olacak, bu dosyayı açıp *`perplayerarguments`* objesinde bulunan **`#1#`** kısmını birleştirerek **`#2#`** haline getirin ve dosyayı kaydedin. Ardından Syncplay'i açıp çalıştırın.",
   "Copy to clipboard": "Panoya kopyala",
   "Copied to clipboard": "Panoya kopyalandı",
 

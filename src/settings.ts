@@ -1,8 +1,13 @@
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, Notice, PluginSettingTab, Setting, MarkdownRenderer } from "obsidian";
 import VLCBridgePlugin from "./main";
 import { t } from "./language/helpers";
 import { currentConfig } from "./vlcHelper";
 
+declare module "obsidian" {
+  interface DataAdapter {
+    getFullRealPath(arg: string): string;
+  }
+}
 export interface VBPluginSettings {
   port: number;
   password: string;
@@ -74,12 +79,39 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     var copyUrlEl: Setting;
     var copyCommandEl: Setting;
     var copyArgEl: Setting;
+
+    const splittedPath = () => {
+      var dirPathArg = "--snapshot-path=" + this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder);
+      return {
+        1: `${dirPathArg
+          .split(" ")
+          .map((str) => `'${str}'`)
+          .join(", ")}`,
+        2: `'${dirPathArg}'`,
+      };
+    };
+
     const setCopyBtnDesc = () => {
-      copyUrlEl.setDesc(`http://:${this.plugin.settings.port}@localhost:${this.plugin.settings.password}/`);
+      copyUrlEl.setDesc(`http://:${this.plugin.settings.password}@localhost:${this.plugin.settings.port}/`);
       copyCommandEl.setDesc(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions().join(" ")}`);
-      // copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`).descEl.createEl("div", {
-      //   text: t("Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)"),
-      // });
+      copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`);
+
+      if (/\s/.test(this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder))) {
+        console.log("boşluk var");
+
+        MarkdownRenderer.render(
+          this.app,
+          `> [!warning]\n> ${t("syncplay argument instructions").replace("#1#", splittedPath()[1]).replace("#2#", splittedPath()[2])}`,
+          copyArgEl.descEl,
+          "",
+          this.plugin
+        );
+      }
+
+      // .createDiv()
+      // .createEl("code", { text: `${splittedPath()}` });
+
+      //
     };
 
     var selectVLCDescEl: HTMLElement;
@@ -112,13 +144,13 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName(t("Port"))
-      .setDesc(t("Enter the port for the server that will be opened to control VLC Player"))
+      .setDesc(t("Enter a port number between 1 and 65535 for the server that will be opened to control VLC Player"))
       .addText((text) =>
         text
           .setPlaceholder(this.plugin.settings.port.toString())
           .setValue(this.plugin.settings.port.toString())
           .onChange(async (value) => {
-            if (isNaN(Number(value))) {
+            if (isNaN(Number(value)) || 65535 < Number(value) || 1 > Number(value)) {
               text.inputEl.style.borderColor = "red";
             } else {
               text.inputEl.style.borderColor = "currentColor";
@@ -225,7 +257,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     copyUrlEl = new Setting(containerEl).setName(t("Copy VLC Web Interface link")).addButton((btn) =>
       btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-        await navigator.clipboard.writeText(`http://:${this.plugin.settings.port}@localhost:${this.plugin.settings.password}/`);
+        await navigator.clipboard.writeText(`http://:${this.plugin.settings.password}@localhost:${this.plugin.settings.port}/`);
         new Notice(t("Copied to clipboard"));
       })
     );
@@ -235,12 +267,12 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         new Notice(t("Copied to clipboard"));
       })
     );
-    // copyArgEl = new Setting(containerEl).setName(t("Copy arguments for starting VLC (for Syncplay)")).addButton((btn) =>
-    //   btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-    //     await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ")}`);
-    //     new Notice(t("Copied to clipboard"));
-    //   })
-    // );
+    copyArgEl = new Setting(containerEl).setName(t("Copy arguments for starting VLC (for Syncplay)")).addButton((btn) =>
+      btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
+        await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim().replace(/["]/g, "")}`);
+        new Notice(t("Copied to clipboard"));
+      })
+    );
     setCopyBtnDesc();
 
     //

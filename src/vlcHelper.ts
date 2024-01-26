@@ -198,9 +198,9 @@ export function passPlugin(plugin: VLCBridgePlugin) {
             }
           }
         });
-      }
-      if (time) {
-        requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
+        if (time) {
+          requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
+        }
       }
     } else {
       new Notice(t("Could not connect to VLC Player."));
@@ -212,7 +212,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     `--http-port=${plugin.settings.port}`,
     `--http-password=${plugin.settings.password}`,
     // `--language ${plugin.settings.lang}`,
-    // @ts-ignore
     `--snapshot-path="${plugin.app.vault.adapter.getFullRealPath(plugin.settings.snapshotFolder)}"`,
     `--snapshot-format="${plugin.settings.snapshotExt}"`,
     `--snapshot-prefix="${plugin.settings.snapshotPrefix}-"`,
