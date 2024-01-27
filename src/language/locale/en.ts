@@ -6,6 +6,9 @@ export default {
   "No video information available": "No video information available",
   //
   "Select a file to open with VLC Player": "Select a file to open with VLC Player",
+  "Add subtitles (if you want subtitle path in the timestamp link, you need to add them with this command)":
+    "Add subtitles (if you want subtitle path in the timestamp link, you need to add them with this command)",
+  "A video must be open to add subtitles": "A video must be open to add subtitles",
   "Seek forward": "Seek forward",
   "Seek backward": "Seek backward",
   "Long seek forward": "Long seek forward",

@@ -97,7 +97,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`);
 
       if (/\s/.test(this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder))) {
-        console.log("boşluk var");
 
         MarkdownRenderer.render(
           this.app,
@@ -269,7 +268,8 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     );
     copyArgEl = new Setting(containerEl).setName(t("Copy arguments for starting VLC (for Syncplay)")).addButton((btn) =>
       btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-        await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim().replace(/["]/g, "")}`);
+        // await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim().replace(/["]/g, "")}`);
+        await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim()}`);
         new Notice(t("Copied to clipboard"));
       })
     );

@@ -4,6 +4,7 @@ const exec = util.promisify(require("child_process").exec);
 import { Notice, RequestUrlResponse, request, requestUrl } from "obsidian";
 import VLCBridgePlugin from "./main";
 import { t } from "./language/helpers";
+import { fileURLToPath } from "url";
 
 interface config {
   port: number | null;
@@ -23,6 +24,46 @@ export const currentConfig: config = {
   vlcPath: "",
   lang: "en",
 };
+
+export const currentMedia: {
+  mediaPath: string | null;
+  subtitlePath: string | null;
+} = {
+  mediaPath: null,
+  subtitlePath: null,
+};
+
+// https://transform.tools/json-to-typescript
+export interface vlcStatusResponse {
+  fullscreen: boolean;
+  // stats: Stats
+  aspectratio: string;
+  seek_sec: number;
+  apiversion: number;
+  currentplid: number;
+  time: number;
+  volume: number;
+  length: number;
+  random: boolean;
+  // audiofilters: Audiofilters
+  information: {
+    chapter: number;
+    chapters: number[];
+    title: number;
+    category: {};
+    titles: number[];
+  };
+  rate: number;
+  // videoeffects: Videoeffects
+  state: string;
+  loop: boolean;
+  version: string;
+  position: number;
+  audiodelay: number;
+  repeat: boolean;
+  subtitledelay: number;
+  equalizer: any[];
+}
 
 // export var isVlcOpen: boolean | null = null;
 var checkTimeout: ReturnType<typeof setTimeout>;
@@ -127,7 +168,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
         .catch((err) => {
           console.log("vlc request error:", err);
           new Notice(t("Could not connect to VLC Player."));
-          reject(err);
+          resolve(null);
         });
     });
   };
@@ -159,7 +200,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     }
   };
 
-  const openVideo = async (filePath: string, time?: number) => {
+  const openVideo = async ({ filePath, subPath, subDelay, time }: { filePath: string; subPath?: string; subDelay?: number; time?: number }) => {
     var port_ = currentConfig.port || plugin.settings.port;
     var password_ = currentConfig.password || plugin.settings.password;
 
@@ -177,34 +218,94 @@ export function passPlugin(plugin: VLCBridgePlugin) {
 
       // console.log(filePath, currentConfig.currentFile, filePath == currentConfig.currentFile);
       if (fileCheck) {
-        if (fileCheck.current && time) {
-          requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
+        if (fileCheck.current) {
+          if (time) {
+            requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
+          }
+          if (subPath && subPath !== currentMedia.subtitlePath) {
+            addSubtitle(subPath, subDelay);
+          }
         } else {
-          await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=pl_play&id=${fileCheck.id}`).then((response) => {
-            if (response.status == 200) {
+          await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=pl_play&id=${fileCheck.id}`).then(async (response) => {
+            if (response.status == 200 && (await waitStreams())) {
               // currentConfig.currentFile = filePath;
               if (time) {
                 requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
+              }
+              if (subPath) {
+                addSubtitle(subPath, subDelay);
               }
             }
           });
         }
       } else {
-        await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=in_play&input=${filePath}`).then((response) => {
-          if (response.status == 200) {
+        await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=in_play&input=${encodeURIComponent(filePath)}`).then(async (response) => {
+          if (response.status == 200 && (await waitStreams())) {
             // currentConfig.currentFile = filePath;
             if (time) {
               requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
             }
+            if (subPath) {
+              addSubtitle(subPath, subDelay);
+            }
           }
         });
-        if (time) {
-          requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
-        }
+        // if (time) {
+        //   requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
+        // }
       }
     } else {
       new Notice(t("Could not connect to VLC Player."));
     }
+  };
+
+  const waitStreams = () => {
+    var port_ = currentConfig.port || plugin.settings.port;
+    var password_ = currentConfig.password || plugin.settings.password;
+    return new Promise<string[]>((resolve, reject) => {
+      let streamTimeout: ReturnType<typeof setTimeout>;
+      let streamInterval: ReturnType<typeof setInterval>;
+      streamInterval = setInterval(() => {
+        requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json`).then(async (response) => {
+          if (response.status == 200) {
+            let streams = Object.keys(response.json.information.category);
+            if (streams.length > 1) {
+              resolve(streams);
+              clearInterval(streamInterval);
+              clearTimeout(streamTimeout);
+            }
+          }
+        });
+      }, 500);
+      streamTimeout = setTimeout(() => {
+        if (!(streamInterval as any)._destroyed) {
+          clearInterval(streamInterval);
+          reject();
+        }
+      }, 10000);
+    });
+  };
+
+  const addSubtitle = async (filePath: string, subDelay?: number | undefined) => {
+    var port_ = currentConfig.port || plugin.settings.port;
+    var password_ = currentConfig.password || plugin.settings.password;
+
+    if (filePath.startsWith("file:///")) {
+      filePath = fileURLToPath(filePath);
+      // filePath = filePath.substring(7).replace(/\//g, "\\");
+    }
+
+    requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=addsubtitle&val=${encodeURIComponent(filePath)}`).then(async (response) => {
+      if (response.status == 200) {
+        currentMedia.mediaPath = await getCurrentVideo();
+        currentMedia.subtitlePath = filePath;
+        let subIndex = (await waitStreams()).filter((e) => e !== "meta").length - 1;
+        requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=subtitle_track&val=${subIndex}`);
+        if (subDelay) {
+          requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=subdelay&val=${subDelay}`);
+        }
+      }
+    });
   };
 
   const vlcExecOptions = () => [
@@ -249,5 +350,5 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     currentConfig.snapshotExt = plugin.settings.snapshotExt;
   };
 
-  return { getCurrentVideo, getStatus, checkPort, sendVlcRequest, openVideo, vlcExecOptions, launchVLC };
+  return { getCurrentVideo, getStatus, checkPort, sendVlcRequest, openVideo, vlcExecOptions, launchVLC, addSubtitle };
 }

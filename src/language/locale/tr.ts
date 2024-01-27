@@ -6,6 +6,9 @@ export default {
   "No video information available": "Mevcut video bilgisine ulaşılamadı",
   //
   "Select a file to open with VLC Player": "VLC Player ile açmak için bir dosya seçin",
+  "Add subtitles (if you want subtitle path in the timestamp link, you need to add them with this command)":
+    "Altyazı ekle (zaman damgalı linkte altyazı adresinin bulunmasını istiyorsanız bu komutla eklemeniz gerekmekte)",
+  "A video must be open to add subtitles": "Altyazı ekleyebilmek için bir video açık olmalı",
   "Seek forward": "İleri sar",
   "Seek backward": "Geri sar",
   "Long seek forward": "İleri uzun sar",
