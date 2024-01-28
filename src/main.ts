@@ -174,7 +174,7 @@ export default class VLCBridgePlugin extends Plugin {
                   .filter((f) => f.path.startsWith(`${currentConfig.snapshotFolder || this.settings.snapshotFolder}/`) && f.stat.mtime > beforeReq && f.stat.mtime < afterReq)
                   ?.first();
               if (snapshot) {
-                editor.replaceSelection(`${currentFile ? `${await this.getTimestampLink(response)}` : `${this.secondsToTimestamp(response.json.time)}`} ![](${snapshot.path})\n`);
+                editor.replaceSelection(`${currentFile ? `${await this.getTimestampLink(response)}` : `${this.secondsToTimestamp(response.json.time)}`}\n![](${snapshot.path})\n`);
               } else {
                 new Notice(t("Snapshot not found, if you made a change to the snapshot folder name, try restarting VLC."));
               }
