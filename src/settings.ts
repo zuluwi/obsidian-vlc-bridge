@@ -2,6 +2,7 @@ import { App, Notice, PluginSettingTab, Setting, MarkdownRenderer } from "obsidi
 import VLCBridgePlugin from "./main";
 import { t } from "./language/helpers";
 import { currentConfig } from "./vlcHelper";
+import isPortReachable from "is-port-reachable";
 
 declare module "obsidian" {
   interface DataAdapter {
@@ -76,12 +77,27 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     //       })
     //   );
 
-    var copyUrlEl: Setting;
-    var copyCommandEl: Setting;
-    var copyArgEl: Setting;
+    const isPortAvailable = (port: number) => {
+      return new Promise<boolean>(async (resolve) => {
+        var isPortInUse = await isPortReachable(port, { host: "localhost" });
+        if (isPortInUse) {
+          if ((port == this.plugin.settings.port || port == currentConfig.port) && (await this.plugin.checkPort())) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        } else {
+          resolve(true);
+        }
+      });
+    };
+
+    let copyUrlEl: Setting;
+    let copyCommandEl: Setting;
+    let copyArgEl: Setting;
 
     const splittedPath = () => {
-      var dirPathArg = "--snapshot-path=" + this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder);
+      let dirPathArg = "--snapshot-path=" + this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder);
       return {
         1: `${dirPathArg
           .split(" ")
@@ -97,7 +113,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`);
 
       if (/\s/.test(this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder))) {
-
         MarkdownRenderer.render(
           this.app,
           `> [!warning]\n> ${t("syncplay argument instructions").replace("#1#", splittedPath()[1]).replace("#2#", splittedPath()[2])}`,
@@ -144,21 +159,30 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName(t("Port"))
       .setDesc(t("Enter a port number between 1 and 65535 for the server that will be opened to control VLC Player"))
-      .addText((text) =>
+      .addText(async (text) => {
         text
           .setPlaceholder(this.plugin.settings.port.toString())
           .setValue(this.plugin.settings.port.toString())
           .onChange(async (value) => {
             if (isNaN(Number(value)) || 65535 < Number(value) || 1 > Number(value)) {
               text.inputEl.style.borderColor = "red";
+            } else if (!(await isPortAvailable(Number(value)))) {
+              text.inputEl.style.borderColor = "red";
+              new Notice(t("The port you selected is not usable, please enter another port value"));
             } else {
               text.inputEl.style.borderColor = "currentColor";
               this.plugin.settings.port = Number(value);
               await this.plugin.saveSettings();
               setCopyBtnDesc();
             }
-          })
-      );
+          });
+        // var portCheck = await getPort({ port: this.plugin.settings.port });
+
+        if (!(await isPortAvailable(this.plugin.settings.port))) {
+          text.inputEl.style.borderColor = "red";
+          new Notice(t("The port you selected is not usable, please enter another port value"));
+        }
+      });
 
     new Setting(containerEl).setName(t("Always show VLC Player on top")).addToggle((toggle) => {
       toggle.setValue(this.plugin.settings.alwaysOnTop).onChange(async (value) => {
@@ -256,21 +280,33 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     copyUrlEl = new Setting(containerEl).setName(t("Copy VLC Web Interface link")).addButton((btn) =>
       btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-        await navigator.clipboard.writeText(`http://:${this.plugin.settings.password}@localhost:${this.plugin.settings.port}/`);
-        new Notice(t("Copied to clipboard"));
+        if (await isPortAvailable(this.plugin.settings.port)) {
+          await navigator.clipboard.writeText(`http://:${this.plugin.settings.password}@localhost:${this.plugin.settings.port}/`);
+          new Notice(t("Copied to clipboard"));
+        } else {
+          new Notice(t("The port you selected is not usable, please enter another port value"));
+        }
       })
     );
     copyCommandEl = new Setting(containerEl).setName(t("Copy command line code")).addButton((btn) =>
       btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-        await navigator.clipboard.writeText(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions().join(" ")}`);
-        new Notice(t("Copied to clipboard"));
+        if (await isPortAvailable(this.plugin.settings.port)) {
+          await navigator.clipboard.writeText(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions().join(" ")}`);
+          new Notice(t("Copied to clipboard"));
+        } else {
+          new Notice(t("The port you selected is not usable, please enter another port value"));
+        }
       })
     );
     copyArgEl = new Setting(containerEl).setName(t("Copy arguments for starting VLC (for Syncplay)")).addButton((btn) =>
       btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-        // await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim().replace(/["]/g, "")}`);
-        await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim()}`);
-        new Notice(t("Copied to clipboard"));
+        if (await isPortAvailable(this.plugin.settings.port)) {
+          // await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim().replace(/["]/g, "")}`);
+          await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim()}`);
+          new Notice(t("Copied to clipboard"));
+        } else {
+          new Notice(t("The port you selected is not usable, please enter another port value"));
+        }
       })
     );
     setCopyBtnDesc();

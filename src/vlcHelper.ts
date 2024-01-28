@@ -5,6 +5,7 @@ import { Notice, RequestUrlResponse, request, requestUrl } from "obsidian";
 import VLCBridgePlugin from "./main";
 import { t } from "./language/helpers";
 import { fileURLToPath } from "url";
+import isPortReachable from "is-port-reachable";
 
 interface config {
   port: number | null;
@@ -209,6 +210,9 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     }
     var plInfo = await checkPort();
     if (!plInfo) {
+      if (!plugin.settings.vlcPath) {
+        return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
+      }
       launchVLC();
       plInfo = await checkPort(5000);
     }
@@ -320,13 +324,12 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     `${plugin.settings.alwaysOnTop ? "--video-on-top" : ""}`,
   ];
 
-  const launchVLC = () => {
-    if (!plugin.settings.vlcPath) {
-      return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
-    }
+  const launchVLC = async () => {
     // console.log("launchVlc");
     // console.log(`"${plugin.settings.vlcPath}" ${vlcExecOptions().join(" ")}`);
-
+    if (await isPortReachable(plugin.settings.port, { host: "localhost" })) {
+      return new Notice(t("The port you selected is not usable, please enter another port value"));
+    }
     exec(`"${plugin.settings.vlcPath}" ${vlcExecOptions().join(" ")}`)
       .finally(() => {
         if (checkInterval) {

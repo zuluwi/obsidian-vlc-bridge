@@ -15,6 +15,7 @@ export default class VLCBridgePlugin extends Plugin {
   addSubtitle: (filePath: string, subDelay?: number) => void;
   sendVlcRequest: (command: string) => Promise<RequestUrlResponse | undefined>;
   getStatus: () => Promise<RequestUrlResponse>;
+  checkPort: (timeout?: number) => Promise<object | null>;
   getCurrentVideo: () => Promise<string | null>;
   vlcExecOptions: () => string[];
 
@@ -25,6 +26,7 @@ export default class VLCBridgePlugin extends Plugin {
     this.addSubtitle = addSubtitle;
     this.sendVlcRequest = sendVlcRequest;
     this.getStatus = getStatus;
+    this.checkPort = checkPort;
     this.getCurrentVideo = getCurrentVideo;
     this.vlcExecOptions = vlcExecOptions;
 

@@ -59,6 +59,7 @@ export default {
 
   /* vlcHelpers*/
   "Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings": "Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings",
+  "The port you selected is not usable, please enter another port value": "The port you selected is not usable, please enter another port value",
   "Could not connect to VLC Player.": "Could not connect to VLC Player.",
   "The vlc.exe specified in the settings could not be run, please check again!": "The vlc.exe specified in the settings could not be run, please check again!",
 };
