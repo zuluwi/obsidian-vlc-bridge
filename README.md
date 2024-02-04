@@ -1,96 +1,71 @@
-# Obsidian Sample Plugin
+<div align="center">
+	
+# Obsidian VLC Bridge
+	
+[![GitHub Release](https://img.shields.io/github/v/release/zuluwi/obsidian-vlc-bridge?style=for-the-badge&logo=obsidian&labelColor=%237c3aed&color=%23e7e6e3)](https://github.com/zuluwi/obsidian-vlc-bridge/releases/latest)
+[![GitHub License](https://img.shields.io/github/license/zuluwi/obsidian-vlc-bridge?style=for-the-badge&labelColor=%23eb0029&color=%23e7e6e3)](https://github.com/zuluwi/obsidian-vlc-bridge/blob/master/LICENSE)
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+</div>
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+This plugin
+- Starts VLC Player with the [Web Interface](https://wiki.videolan.org/Documentation:Modules/http_intf/#VLC_2.0.0_and_later) active and opens video addresses written in Obsidian URI format at the specified time,
+- Pastes timestamped link or snapshot from existing video into note
+- Allows you to control the player by sending [request](https://code.videolan.org/videolan/vlc-3.0/-/blob/master/share/lua/http/requests/README.txt) to the VLC Web Interface with commands, 
+so you can take notes from the video without losing focus from the Obsidian Editor.
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+## Installation
+This plugin is not an official community plugin, so you can install it manually or using the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+### Manual
+1. Download [Latest version](https://github.com/zuluwi/obsidian-vlc-bridge/releases/latest)
+2. Create a new folder at `<vault_location>/.obsidian/plugins`
+3. Move the downloaded `main.js` and `manifest.json` files to this folder
+4. Turn off `Settings → Community plugins → Restricted mode` and enable **VLC Bridge** in `Installed plugins`.
+### With BRAT
+1. Install and activate **BRAT** by opening the `obsidian://show-plugin?id=obsidian42-brat` link or from `Settings → Community plugins → Browse`
+2. Install **VLC Bridge** by using the `Add a beta plugin for testing` command and then entering `zuluwi/obsidian-vlc-bridge` or by opening the link `obsidian://brat?plugin=zuluwi/obsidian-vlc-bridge`
 
-## First time developing plugins?
+## Usage
+> [!important] 
+> To use the plugin, you must first select `vlc.exe` in the plugin settings from the location where VLC Player is installed and then set a port number
 
-Quick starting guide for new plugin devs:
+### Opening Video
+- Using the `Select a file to open with VLC Player` command or by clicking on the icon in the sidebar
+- By clicking on a timestamp link you created with the plugin
+- or by dragging and dropping a video to the player you have already opened with the plugin
+you can control VLC Player with the plugin for videos you open in these ways.
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+>[!tip]
+> If you want to be able to use the plugin when you open VLC yourself on your computer, you must save the parameters you set in the plugin settings in the VLC preferences
+> 1. Open `Tools → Preferences → select "All" in "Show Settings" at the bottom-left corner → Interface → Main interfaces` and check `Web`, then in `Main interfaces → Lua` set the password to `vlcPassword` in the `Lua HTTP` header
+> 2. `select "Simple" in "Show Settings" at the bottom-left corner → Video → Video snapshots` and set `Directory` to the folder you set in the plugin settings
+> 3. VLC Player uses port `8080` and this cannot be changed in the preferences, so you have to set the port to `8080` in the plugin settings.
 
-## Releasing new releases
+#### Add Timestamp Link
+Open the command palette (Ctrl+P) and use the command `Paste timestamped link of current video` to paste the timestamped link of the current video where the cursor is in the editor.
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
-
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check https://github.com/obsidianmd/obsidian-releases/blob/master/plugin-review.md
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+Link Syntax:
+```
+[<timestamp>](obsidian://vlcBridge?mediaPath=<File URI>&subPath=<File URI or Absolute Path>&subDelay=<in seconds>&timestamp=<in seconds>)
 ```
 
-If you have multiple URLs, you can also do:
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+>[!tip]
+> Check `Pause video while pasting timestamp` in Settings
 
-## API Documentation
+#### Include Subtitle Link
+If you want to include the subtitle link in the video link, instead of dragging the subtitle to the VLC Player, use the `Add subtitles` command to select the file and add it to the video, otherwise the plugin will not be able to access the existing subtitles.
 
-See https://github.com/obsidianmd/obsidian-api
+### Add Snapshot Embed
+Open the command palette (Ctrl+P) and use the `Take and paste snapshot from video` command to paste the timestamped link of the current video and the embed of that snapshot where the cursor is in the editor.
+
+>[!tip]
+> Check `Pause video while pasting snapshot` in Settings
+
+### Running Syncplay with plugin arguments
+[Syncplay](https://github.com/Syncplay/syncplay?tab=readme-ov-file#syncplay) is an application that connects to an online server to open the preferred player and synchronizes the connected players. By selecting `Syncplay.exe` from the plugin settings and clicking the **Start Syncplay** button, you can start Syncplay so that the plugin interacts with the VLC Player that the app will open.
+
+## Attributions
+- [Media Extended](https://github.com/PKM-er/media-extended)
+- [Obsidian VLC Control](https://github.com/prehensileBBC/obsidan-vlc-control)
+- [Syncplay](https://github.com/Syncplay/syncplay)
