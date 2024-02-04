@@ -6,8 +6,7 @@ export default {
   "No video information available": "Mevcut video bilgisine ulaşılamadı",
   //
   "Select a file to open with VLC Player": "VLC Player ile açmak için bir dosya seçin",
-  "Add subtitles (if you want subtitle path in the timestamp link, you need to add them with this command)":
-    "Altyazı ekle (zaman damgalı linkte altyazı adresinin bulunmasını istiyorsanız bu komutla eklemeniz gerekmekte)",
+  "Add subtitles": "Altyazı ekle",
   "A video must be open to add subtitles": "Altyazı ekleyebilmek için bir video açık olmalı",
   "Seek forward": "İleri sar",
   "Seek backward": "Geri sar",
@@ -39,7 +38,15 @@ export default {
   "Long Seek Amount (in seconds)": "Uzun İleri/Geri Sarma Miktarı (saniye cinsinden)",
   "Set the seek amount for 'Long seek forward/backward' commands": "Uzun İleri/Geri Sar komutları için atmala miktarını seçiniz",
   //
-  "Snapshot Settings": "Snapshot Ayarları",
+  "Syncplay Path": "Syncplay Yolu",
+  "Select 'Syncplay.exe' from the folder where Syncplay is installed": "Syncplay'in kurulu olduğu klasörden Syncplay.exe'yi seçiniz",
+  "Select Syncplay.exe": "Syncplay.exe'yi seç",
+  "Start Syncplay with plugin arguments": "Plugin argümanlarıyla Syncplay'i çalıştır",
+  "Start Syncplay": "Syncplay'i çalıştır",
+  "Before you can use this command, you need to select 'Syncplay.exe' in the plugin settings":
+    "Bu komutu kullanabilmek için öncelikle plugin ayarlarından 'Syncplay.exe'yi seçmeniz gerekmekte",
+  //
+  Snapshot: "Snapshot",
   "Snapshot folder": "Snapshot Klasörü",
   "Enter the folder name where snapshots will be saved in the vault": "Snapshotların kasada kaydedileceği klasör adını giriniz",
   "Select a valid file name": `Geçerli bir dosya adı seçiniz ( isim \\ / < > " * : | ? karakterlerini barındırmamalı )`,
@@ -49,11 +56,8 @@ export default {
   Extra: "Ekstra",
   "Copy VLC Web Interface link": "VLC Web Interface linkini kopyala",
   "Copy command line code": "Komut satırı kodunu kopyala",
-  "Copy arguments for starting VLC (for Syncplay)": "VLC'yi başlatma argümanlarını kopyala (Syncplay için)",
-  "Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)":
-    "Not: Eğer `--snapshot-path` seçeneği boşluk içeriyorsa snapshot komutu çalışmayacaktır (bu sadece Syncplay argümanları için geçerlidir)",
-  "syncplay argument instructions":
-    "Snapshot klasör yolu boşluk barındırdığı için Syncplay ile VLC'yi açtığınızda hata alacaksınız. Bunu düzeltmek için argümanları yapıştırıp **`Yapılandırmayı depolayın ve Syncplay'i çalıştırın`** butonuna tıklayarak bir kere başlatıp programı kapatın. Argümanlar Syncplay'in kurulu olduğu **`syncplay.ini`** dosyasına kaydedilmiş olacak, bu dosyayı açıp *`perplayerarguments`* objesinde bulunan **`#1#`** kısmını birleştirerek **`#2#`** haline getirin ve dosyayı kaydedin. Ardından Syncplay'i açıp çalıştırın.",
+  // "Copy arguments for starting VLC (for Syncplay)": "VLC'yi başlatma argümanlarını kopyala (Syncplay için)",
+  // "syncplay argument instructions": "Snapshot klasör yolu boşluk barındırdığı için Syncplay ile VLC'yi açtığınızda hata alacaksınız. Bunu düzeltmek için argümanları yapıştırıp **`Yapılandırmayı depolayın ve Syncplay'i çalıştırın`** butonuna tıklayarak bir kere başlatıp programı kapatın. Argümanlar Syncplay'in kurulu olduğu **`syncplay.ini`** dosyasına kaydedilmiş olacak, bu dosyayı açıp *`perplayerarguments`* objesinde bulunan **`#1#`** kısmını birleştirerek **`#2#`** haline getirin ve dosyayı kaydedin. Ardından Syncplay'i açıp çalıştırın.",
   "Copy to clipboard": "Panoya kopyala",
   "Copied to clipboard": "Panoya kopyalandı",
 

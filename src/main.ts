@@ -18,10 +18,11 @@ export default class VLCBridgePlugin extends Plugin {
   checkPort: (timeout?: number) => Promise<object | null>;
   getCurrentVideo: () => Promise<string | null>;
   vlcExecOptions: () => string[];
+  launchSyncplay: () => void;
 
   async onload() {
     await this.loadSettings();
-    var { getStatus, getCurrentVideo, checkPort, sendVlcRequest, openVideo, launchVLC, vlcExecOptions, addSubtitle } = passPlugin(this);
+    var { getStatus, getCurrentVideo, checkPort, sendVlcRequest, openVideo, launchVLC, launchSyncplay, vlcExecOptions, addSubtitle } = passPlugin(this);
     this.openVideo = openVideo;
     this.addSubtitle = addSubtitle;
     this.sendVlcRequest = sendVlcRequest;
@@ -29,6 +30,7 @@ export default class VLCBridgePlugin extends Plugin {
     this.checkPort = checkPort;
     this.getCurrentVideo = getCurrentVideo;
     this.vlcExecOptions = vlcExecOptions;
+    this.launchSyncplay = launchSyncplay;
 
     // This creates an icon in the left ribbon.
     this.addRibbonIcon("lucide-traffic-cone", t("Select a file to open with VLC Player"), (evt: MouseEvent) => {
@@ -84,9 +86,17 @@ export default class VLCBridgePlugin extends Plugin {
     });
 
     this.addCommand({
+      id: "open-syncplay",
+      name: t("Start Syncplay with plugin arguments"),
+      callback: async () => {
+        this.launchSyncplay();
+      },
+    });
+
+    this.addCommand({
       id: "add-subtitle",
       icon: "lucide-subtitles",
-      name: t("Add subtitles (if you want subtitle path in the timestamp link, you need to add them with this command)"),
+      name: t("Add subtitles"),
       callback: async () => {
         this.subtitleOpen();
       },

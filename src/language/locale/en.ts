@@ -6,8 +6,7 @@ export default {
   "No video information available": "No video information available",
   //
   "Select a file to open with VLC Player": "Select a file to open with VLC Player",
-  "Add subtitles (if you want subtitle path in the timestamp link, you need to add them with this command)":
-    "Add subtitles (if you want subtitle path in the timestamp link, you need to add them with this command)",
+  "Add subtitles": "Add subtitles",
   "A video must be open to add subtitles": "A video must be open to add subtitles",
   "Seek forward": "Seek forward",
   "Seek backward": "Seek backward",
@@ -39,21 +38,26 @@ export default {
   "Long Seek Amount (in seconds)": "Long Seek Amount (in seconds)",
   "Set the seek amount for 'Long seek forward/backward' commands": "Set the seek amount for 'Long seek forward/backward' commands",
   //
-  "Snapshot Settings": "Snapshot Settings",
+  Snapshot: "Snapshot",
   "Snapshot folder": "Snapshot folder",
   "Enter the folder name where snapshots will be saved in the vault": "Enter the folder name where snapshots will be saved in the vault",
   "Select a valid file name": `Select a valid file name ( name must not contain the characters \\ / < > " * : | ?  )`,
   "Snapshot Format": "Snapshot Format",
   "Select the image format in which the snapshots will be saved": "Select the image format in which the snapshots will be saved",
   //
+  "Syncplay Path": "Syncplay Path",
+  "Select 'Syncplay.exe' from the folder where Syncplay is installed": "Select 'Syncplay.exe' from the folder where Syncplay is installed",
+  "Select Syncplay.exe": "Select Syncplay.exe",
+  "Start Syncplay with plugin arguments": "Start Syncplay with plugin arguments",
+  "Start Syncplay": "Start Syncplay",
+  "Before you can use this command, you need to select 'Syncplay.exe' in the plugin settings":
+    "Before you can use this command, you need to select 'Syncplay.exe' in the plugin settings",
+  //
   Extra: "Extra",
   "Copy VLC Web Interface link": "Copy VLC Web Interface link",
   "Copy command line code": "Copy command line code",
-  "Copy arguments for starting VLC (for Syncplay)": "Copy arguments for starting VLC (for Syncplay)",
-  "Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)":
-    "Note: If the `--snapshot-path` option contains spaces, the snapshot command will not work (this only happens for Syncplay arguments)",
-  "syncplay argument instructions":
-    "You will get an error when you open VLC with Syncplay because the Snapshot folder path contains spaces. To fix this, paste the arguments and click the **`Store configuration and run Syncplay`** button to start the program once and close it. The arguments will be saved in the **`syncplay.ini`** file where Syncplay is installed, open this file and merge the **`#1#`** in the *`perplayerarguments`* object into **`#2#`** and save the file. Then open Syncplay and run it.",
+  // "Copy arguments for starting VLC (for Syncplay)": "Copy arguments for starting VLC (for Syncplay)",
+  // "syncplay argument instructions": "You will get an error when you open VLC with Syncplay because the Snapshot folder path contains spaces. To fix this, paste the arguments and click the **`Store configuration and run Syncplay`** button to start the program once and close it. The arguments will be saved in the **`syncplay.ini`** file where Syncplay is installed, open this file and merge the **`#1#`** in the *`perplayerarguments`* object into **`#2#`** and save the file. Then open Syncplay and run it.",
   "Copy to clipboard": "Copy to clipboard",
   "Copied to clipboard": "Copied to clipboard",
 

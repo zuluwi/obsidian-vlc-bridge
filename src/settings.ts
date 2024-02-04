@@ -17,6 +17,7 @@ export interface VBPluginSettings {
   snapshotExt: "png" | "jpg" | "tiff";
   currentFile: string | null;
   vlcPath: string;
+  syncplayPath: string;
   lang: string;
   normalSeek: number;
   largeSeek: number;
@@ -33,6 +34,7 @@ export const DEFAULT_SETTINGS: VBPluginSettings = {
   snapshotExt: "png",
   currentFile: null,
   vlcPath: "",
+  syncplayPath: "",
   lang: "en",
   normalSeek: 5,
   largeSeek: 60,
@@ -94,6 +96,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     let copyUrlEl: Setting;
     let copyCommandEl: Setting;
+    let syncplayArgEl: Setting;
     let copyArgEl: Setting;
 
     const splittedPath = () => {
@@ -108,19 +111,20 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     };
 
     const setCopyBtnDesc = () => {
+      syncplayArgEl.setDesc(`"${this.plugin.settings.syncplayPath}" -- ${this.plugin.vlcExecOptions().join(" ")}`);
       copyUrlEl.setDesc(`http://:${this.plugin.settings.password}@localhost:${this.plugin.settings.port}/`);
       copyCommandEl.setDesc(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions().join(" ")}`);
-      copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`);
 
-      if (/\s/.test(this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder))) {
-        MarkdownRenderer.render(
-          this.app,
-          `> [!warning]\n> ${t("syncplay argument instructions").replace("#1#", splittedPath()[1]).replace("#2#", splittedPath()[2])}`,
-          copyArgEl.descEl,
-          "",
-          this.plugin
-        );
-      }
+      // copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`);
+      // if (/\s/.test(this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder))) {
+      //   MarkdownRenderer.render(
+      //     this.app,
+      //     `> [!warning]\n> ${t("syncplay argument instructions").replace("#1#", splittedPath()[1]).replace("#2#", splittedPath()[2])}`,
+      //     copyArgEl.descEl,
+      //     "",
+      //     this.plugin
+      //   );
+      // }
 
       // .createDiv()
       // .createEl("code", { text: `${splittedPath()}` });
@@ -137,8 +141,8 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           const input = document.createElement("input");
           input.setAttribute("type", "file");
           input.accept = ".exe";
-          input.onchange = async (e: any) => {
-            var files = e.target.files;
+          input.onchange = async (e: Event) => {
+            var files = (e.target as HTMLInputElement)?.files as FileList;
             for (let i = 0; i < files.length; i++) {
               var file = files[i];
 
@@ -234,7 +238,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           });
       });
 
-    containerEl.createEl("h1", { text: t("Snapshot Settings") });
+    containerEl.createEl("h1", { text: t("Snapshot") });
 
     var folderNamePattern = /^[A-Za-z0-9][^\\\/\<\>\"\*\:\|\?]*$/gi;
     new Setting(containerEl)
@@ -276,6 +280,45 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           });
       });
 
+    containerEl.createEl("h1", { text: "Syncplay" });
+
+    var selectSPDescEl: HTMLElement;
+    var selectSP = new Setting(containerEl)
+      .setName(t("Syncplay Path"))
+      .setDesc(t("Select 'Syncplay.exe' from the folder where Syncplay is installed"))
+      .addButton((btn) => {
+        btn
+          .setButtonText(t("Select Syncplay.exe"))
+
+          .onClick(() => {
+            const input = document.createElement("input");
+            input.setAttribute("type", "file");
+            input.accept = ".exe";
+            input.onchange = async (e: Event) => {
+              var files = (e.target as HTMLInputElement)?.files as FileList;
+              for (let i = 0; i < files.length; i++) {
+                var file = files[i];
+
+                this.plugin.settings.syncplayPath = file.path;
+                selectSPDescEl.innerText = file.path;
+                await this.plugin.saveSettings();
+                setCopyBtnDesc();
+
+                input.remove();
+              }
+            };
+
+            input.click();
+          });
+      });
+    selectSPDescEl = selectSP.descEl.createEl("div").createEl("b", { text: this.plugin.settings.syncplayPath || "" });
+
+    syncplayArgEl = new Setting(containerEl).setName(t("Start Syncplay with plugin arguments")).addButton((btn) =>
+      btn.setButtonText(t("Start Syncplay")).onClick(async () => {
+        this.plugin.launchSyncplay();
+      })
+    );
+
     containerEl.createEl("h1", { text: t("Extra") });
 
     copyUrlEl = new Setting(containerEl).setName(t("Copy VLC Web Interface link")).addButton((btn) =>
@@ -298,17 +341,17 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         }
       })
     );
-    copyArgEl = new Setting(containerEl).setName(t("Copy arguments for starting VLC (for Syncplay)")).addButton((btn) =>
-      btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-        if (await isPortAvailable(this.plugin.settings.port)) {
-          // await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim().replace(/["]/g, "")}`);
-          await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim()}`);
-          new Notice(t("Copied to clipboard"));
-        } else {
-          new Notice(t("The port you selected is not usable, please enter another port value"));
-        }
-      })
-    );
+    // copyArgEl = new Setting(containerEl).setName(t("Copy arguments for starting VLC (for Syncplay)")).addButton((btn) =>
+    //   btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
+    //     if (await isPortAvailable(this.plugin.settings.port)) {
+    //       // await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim().replace(/["]/g, "")}`);
+    //       await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim()}`);
+    //       new Notice(t("Copied to clipboard"));
+    //     } else {
+    //       new Notice(t("The port you selected is not usable, please enter another port value"));
+    //     }
+    //   })
+    // );
     setCopyBtnDesc();
 
     //

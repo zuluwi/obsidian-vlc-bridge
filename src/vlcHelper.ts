@@ -223,21 +223,21 @@ export function passPlugin(plugin: VLCBridgePlugin) {
       // console.log(filePath, currentConfig.currentFile, filePath == currentConfig.currentFile);
       if (fileCheck) {
         if (fileCheck.current) {
-          if (time) {
-            requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
-          }
           if (subPath && subPath !== currentMedia.subtitlePath) {
             addSubtitle(subPath, subDelay);
+          }
+          if (time) {
+            requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
           }
         } else {
           await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=pl_play&id=${fileCheck.id}`).then(async (response) => {
             if (response.status == 200 && (await waitStreams())) {
               // currentConfig.currentFile = filePath;
-              if (time) {
-                requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
-              }
               if (subPath) {
                 addSubtitle(subPath, subDelay);
+              }
+              if (time) {
+                requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
               }
             }
           });
@@ -246,11 +246,11 @@ export function passPlugin(plugin: VLCBridgePlugin) {
         await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=in_play&input=${encodeURIComponent(filePath)}`).then(async (response) => {
           if (response.status == 200 && (await waitStreams())) {
             // currentConfig.currentFile = filePath;
-            if (time) {
-              requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
-            }
             if (subPath) {
               addSubtitle(subPath, subDelay);
+            }
+            if (time) {
+              requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
             }
           }
         });
@@ -305,7 +305,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
         currentMedia.subtitlePath = filePath;
         let subIndex = (await waitStreams()).filter((e) => e !== "meta").length - 1;
         requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=subtitle_track&val=${subIndex}`);
-        if (subDelay) {
+        if (typeof subDelay == "number") {
           requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=subdelay&val=${subDelay}`);
         }
       }
@@ -353,5 +353,29 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     currentConfig.snapshotExt = plugin.settings.snapshotExt;
   };
 
-  return { getCurrentVideo, getStatus, checkPort, sendVlcRequest, openVideo, vlcExecOptions, launchVLC, addSubtitle };
+  const launchSyncplay = async () => {
+    // console.log("launchVlc");
+    // console.log(`"${plugin.settings.vlcPath}" ${vlcExecOptions().join(" ")}`);
+
+    if (!plugin.settings.syncplayPath) {
+      return new Notice(t("Before you can use this command, you need to select 'Syncplay.exe' in the plugin settings"));
+    }
+    if (await isPortReachable(plugin.settings.port, { host: "localhost" })) {
+      return new Notice(t("The port you selected is not usable, please enter another port value"));
+    }
+    exec(`"${plugin.settings.syncplayPath}" -- ${vlcExecOptions().join(" ")}`)
+      .finally(() => {})
+      .catch((err: Error) => {
+        console.log("Syncplay Launch Error", err);
+        new Notice(t("The vlc.exe specified in the settings could not be run, please check again!"));
+      });
+    currentConfig.vlcPath = plugin.settings.vlcPath;
+    currentConfig.port = plugin.settings.port;
+    currentConfig.password = plugin.settings.password;
+    currentConfig.lang = plugin.settings.lang;
+    currentConfig.snapshotFolder = plugin.settings.snapshotFolder;
+    currentConfig.snapshotExt = plugin.settings.snapshotExt;
+  };
+
+  return { getCurrentVideo, getStatus, checkPort, sendVlcRequest, openVideo, vlcExecOptions, launchVLC, launchSyncplay, addSubtitle };
 }
