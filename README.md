@@ -33,6 +33,7 @@ This plugin is not an official community plugin, so you can install it manually 
 - Using the `Select a file to open with VLC Player` command or by clicking on the icon in the sidebar
 - By clicking on a timestamp link you created with the plugin
 - or by dragging and dropping a video to the player you have already opened with the plugin
+
 you can control VLC Player with the plugin for videos you open in these ways.
 
 >[!tip]
