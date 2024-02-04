@@ -11,7 +11,12 @@ This plugin
 - Starts VLC Player with the [Web Interface](https://wiki.videolan.org/Documentation:Modules/http_intf/#VLC_2.0.0_and_later) active and opens video addresses written in Obsidian URI format at the specified time,
 - Pastes timestamped link or snapshot from existing video into note
 - Allows you to control the player by sending [request](https://code.videolan.org/videolan/vlc-3.0/-/blob/master/share/lua/http/requests/README.txt) to the VLC Web Interface with commands, 
+
 so you can take notes from the video without losing focus from the Obsidian Editor.
+
+https://github.com/zuluwi/obsidian-vlc-bridge/assets/111116092/296c6878-232f-48ee-82a4-dd5673ddb131
+
+
 
 ## Installation
 This plugin is not an official community plugin, so you can install it manually or using the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin
