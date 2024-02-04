@@ -41,7 +41,7 @@ you can control VLC Player with the plugin for videos you open in these ways.
 > 2. `select "Simple" in "Show Settings" at the bottom-left corner → Video → Video snapshots` and set `Directory` to the folder you set in the plugin settings
 > 3. VLC Player uses port `8080` and this cannot be changed in the preferences, so you have to set the port to `8080` in the plugin settings.
 
-#### Add Timestamp Link
+### Add Timestamp Link
 Open the command palette (Ctrl+P) and use the command `Paste timestamped link of current video` to paste the timestamped link of the current video where the cursor is in the editor.
 
 Link Syntax:
