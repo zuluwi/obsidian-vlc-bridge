@@ -11,7 +11,12 @@ This plugin
 - Starts VLC Player with the [Web Interface](https://wiki.videolan.org/Documentation:Modules/http_intf/#VLC_2.0.0_and_later) active and opens video addresses written in Obsidian URI format at the specified time,
 - Pastes timestamped link or snapshot from existing video into note
 - Allows you to control the player by sending [request](https://code.videolan.org/videolan/vlc-3.0/-/blob/master/share/lua/http/requests/README.txt) to the VLC Web Interface with commands, 
+
 so you can take notes from the video without losing focus from the Obsidian Editor.
+
+https://github.com/zuluwi/obsidian-vlc-bridge/assets/111116092/296c6878-232f-48ee-82a4-dd5673ddb131
+
+
 
 ## Installation
 This plugin is not an official community plugin, so you can install it manually or using the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin
@@ -33,6 +38,7 @@ This plugin is not an official community plugin, so you can install it manually 
 - Using the `Select a file to open with VLC Player` command or by clicking on the icon in the sidebar
 - By clicking on a timestamp link you created with the plugin
 - or by dragging and dropping a video to the player you have already opened with the plugin
+
 you can control VLC Player with the plugin for videos you open in these ways.
 
 >[!tip]
@@ -41,7 +47,7 @@ you can control VLC Player with the plugin for videos you open in these ways.
 > 2. `select "Simple" in "Show Settings" at the bottom-left corner → Video → Video snapshots` and set `Directory` to the folder you set in the plugin settings
 > 3. VLC Player uses port `8080` and this cannot be changed in the preferences, so you have to set the port to `8080` in the plugin settings.
 
-#### Add Timestamp Link
+### Add Timestamp Link
 Open the command palette (Ctrl+P) and use the command `Paste timestamped link of current video` to paste the timestamped link of the current video where the cursor is in the editor.
 
 Link Syntax:
