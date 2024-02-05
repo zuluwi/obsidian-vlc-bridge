@@ -11,6 +11,7 @@ declare global {
 
 export default class VLCBridgePlugin extends Plugin {
   settings: VBPluginSettings;
+  openVideoIcon: HTMLElement;
   openVideo: ({ filePath, subPath, subDelay, time }: { filePath: string; subPath?: string; subDelay?: number; time?: number }) => void;
   addSubtitle: (filePath: string, subDelay?: number) => void;
   sendVlcRequest: (command: string) => Promise<RequestUrlResponse | undefined>;
@@ -31,11 +32,6 @@ export default class VLCBridgePlugin extends Plugin {
     this.getCurrentVideo = getCurrentVideo;
     this.vlcExecOptions = vlcExecOptions;
     this.launchSyncplay = launchSyncplay;
-
-    // This creates an icon in the left ribbon.
-    this.addRibbonIcon("lucide-traffic-cone", t("Select a file to open with VLC Player"), (evt: MouseEvent) => {
-      this.fileOpen();
-    });
 
     this.registerObsidianProtocolHandler("vlcBridge", (params: ObsidianProtocolData) => {
       var { mediaPath, subPath, subDelay, timestamp } = params;
@@ -138,13 +134,21 @@ export default class VLCBridgePlugin extends Plugin {
     });
 
     this.addCommand({
+      id: "vlc-toggle-fullscreen",
+      name: t("Toggle fullscreen"),
+      callback: async () => {
+        this.sendVlcRequest(`fullscreen`);
+      },
+    });
+
+    this.addCommand({
       id: "vlc-toggle-play",
       name: t("Toggle play/pause"),
-      // editorCallback: (editor: Editor, view: MarkdownView) => {
       callback: async () => {
         this.sendVlcRequest(`pl_pause`);
       },
     });
+
     this.addCommand({
       id: "vlc-paste-snapshot",
       name: t("Take and paste snapshot from video"),
@@ -203,6 +207,15 @@ export default class VLCBridgePlugin extends Plugin {
   }
 
   onunload() {}
+  setSidebarIcon = () => {
+    if (this.settings.showSidebarIcon) {
+      this.openVideoIcon = this.addRibbonIcon("lucide-traffic-cone", t("Select a file to open with VLC Player"), (evt: MouseEvent) => {
+        this.fileOpen();
+      });
+    } else {
+      this.openVideoIcon?.remove();
+    }
+  };
   secondsToTimestamp(seconds: number) {
     return new Date(seconds * 1000).toISOString().slice(seconds < 3600 ? 14 : 11, 19);
   }

@@ -54,10 +54,10 @@ Link Syntax:
 > Check `Pause video while pasting timestamp` in Settings
 
 #### Include Subtitle Link
-If you want to include the subtitle link in the video link, instead of dragging the subtitle to the VLC Player, use the `Add subtitles` command to select the file and add it to the video, otherwise the plugin will not be able to access the existing subtitles.
+If you want to include the subtitle link in the video link, instead of dragging the subtitle to the VLC Player, use the `Add subtitles` command to select the file and add it to the video, otherwise the plugin will not be able to access the existing subtitle in the player.
 
 ### Add Snapshot Embed
-Open the command palette (Ctrl+P) and use the `Take and paste snapshot from video` command to paste the timestamped link of the current video and the embed of that snapshot where the cursor is in the editor.
+Open the command palette (Ctrl+P) and use the `Take and paste snapshot from video` command to paste a snapshot of the current video with the timestamped link where the cursor is in the editor.
 
 >[!tip]
 > Check `Pause video while pasting snapshot` in Settings

@@ -121,6 +121,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     });
   };
 
+  // Reference: https://code.videolan.org/videolan/vlc-3.0/-/blob/master/share/lua/http/requests/README.txt
   const sendVlcRequest = async (command: string) => {
     var port_ = currentConfig.port || plugin.settings.port;
     var password_ = currentConfig.password || plugin.settings.password;
@@ -312,6 +313,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     });
   };
 
+  // Reference: https://wiki.videolan.org/VLC_command-line_help/
   const vlcExecOptions = () => [
     `--extraintf=luaintf:http`,
     `--http-port=${plugin.settings.port}`,
@@ -363,7 +365,9 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     if (await isPortReachable(plugin.settings.port, { host: "localhost" })) {
       return new Notice(t("The port you selected is not usable, please enter another port value"));
     }
-    exec(`"${plugin.settings.syncplayPath}" -- ${vlcExecOptions().join(" ")}`)
+
+    // Reference: https://syncplay.pl/guide/client/
+    exec(`"${plugin.settings.syncplayPath}" --player-path "${plugin.settings.vlcPath}" -- ${vlcExecOptions().join(" ")}`)
       .finally(() => {})
       .catch((err: Error) => {
         console.log("Syncplay Launch Error", err);

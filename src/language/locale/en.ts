@@ -13,6 +13,7 @@ export default {
   "Long seek forward": "Long seek forward",
   "Long seek backward": "Long seek backward",
   "Toggle play/pause": "Toggle play/pause",
+  "Toggle fullscreen": "Toggle fullscreen",
   // snapshot
   "Take and paste snapshot from video": "Take and paste snapshot from video",
   "You must restart VLC for the snapshots to be saved in the folder you set.": "You must restart VLC for the snapshots to be saved in the folder you set.",
@@ -31,6 +32,7 @@ export default {
   "Always show VLC Player on top": "Always show VLC Player on top",
   "Pause video while pasting timestamp": "Pause video while pasting timestamp",
   "Pause video while pasting snapshot": "Pause video while pasting snapshot",
+  "Show 'open video' icon in the sidebar": "Show 'open video' icon in the sidebar",
   //
   "Seeking Amounts": "Seeking Amounts",
   "Normal Seek Amount (in seconds)": "Normal Seek Amount (in seconds)",

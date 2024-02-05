@@ -24,6 +24,7 @@ export interface VBPluginSettings {
   alwaysOnTop: boolean;
   pauseOnPasteLink: boolean;
   pauseOnPasteSnapshot: boolean;
+  showSidebarIcon: boolean;
 }
 
 export const DEFAULT_SETTINGS: VBPluginSettings = {
@@ -41,6 +42,7 @@ export const DEFAULT_SETTINGS: VBPluginSettings = {
   alwaysOnTop: true,
   pauseOnPasteLink: false,
   pauseOnPasteSnapshot: false,
+  showSidebarIcon: true,
 };
 
 const snapshotExts: {
@@ -111,7 +113,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     };
 
     const setCopyBtnDesc = () => {
-      syncplayArgEl.setDesc(`"${this.plugin.settings.syncplayPath}" -- ${this.plugin.vlcExecOptions().join(" ")}`);
+      syncplayArgEl.setDesc(`"${this.plugin.settings.syncplayPath}" --player-path "${this.plugin.settings.vlcPath}" -- ${this.plugin.vlcExecOptions().join(" ")}`);
       copyUrlEl.setDesc(`http://:${this.plugin.settings.password}@localhost:${this.plugin.settings.port}/`);
       copyCommandEl.setDesc(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions().join(" ")}`);
 
@@ -205,6 +207,13 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       toggle.setValue(this.plugin.settings.pauseOnPasteSnapshot).onChange((value) => {
         this.plugin.settings.pauseOnPasteSnapshot = value;
         this.plugin.saveSettings();
+      });
+    });
+    new Setting(containerEl).setName(t("Show 'open video' icon in the sidebar")).addToggle((toggle) => {
+      toggle.setValue(this.plugin.settings.showSidebarIcon).onChange(async (value) => {
+        this.plugin.settings.showSidebarIcon = value;
+        await this.plugin.saveSettings();
+        this.plugin.setSidebarIcon();
       });
     });
 

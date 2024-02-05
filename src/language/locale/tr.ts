@@ -13,6 +13,7 @@ export default {
   "Long seek forward": "İleri uzun sar",
   "Long seek backward": "Geri uzun sar",
   "Toggle play/pause": "Oynat/duraklat",
+  "Toggle fullscreen": "Tam ekranı aç/kapat",
   // snapshot
   "Take and paste snapshot from video": "Videodan anlık görüntü/snapshot yakala ve yapıştır",
   "You must restart VLC for the snapshots to be saved in the folder you set.": "Snapshotların yeni belirlediğiniz klasöre kaydedilmesi için VLC'yi yeniden başlatmalısınız.",
@@ -31,6 +32,7 @@ export default {
   "Always show VLC Player on top": "VLC Player'ı her zaman üstte göster",
   "Pause video while pasting timestamp": "Zaman damgası yapıştırırken videoyu duraklat",
   "Pause video while pasting snapshot": "Snapshot yapıştırırken videoyu duraklat",
+  "Show 'open video' icon in the sidebar": "Yan çubukta 'video aç' ikonunu göster",
   //
   "Seeking Amounts": "İleri/Geri Sarma Miktarları",
   "Normal Seek Amount (in seconds)": "Normal İleri/Geri Sarma Miktarı (saniye cinsinden)",
