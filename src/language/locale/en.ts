@@ -8,6 +8,8 @@ export default {
   "Select a file to open with VLC Player": "Select a file to open with VLC Player",
   "Add subtitles": "Add subtitles",
   "A video must be open to add subtitles": "A video must be open to add subtitles",
+  "Next frame": "Next frame",
+  "Previous frame": "Previous frame",
   "Seek forward": "Seek forward",
   "Seek backward": "Seek backward",
   "Long seek forward": "Long seek forward",
@@ -32,6 +34,9 @@ export default {
   "Always show VLC Player on top": "Always show VLC Player on top",
   "Pause video while pasting timestamp": "Pause video while pasting timestamp",
   "Pause video while pasting snapshot": "Pause video while pasting snapshot",
+  "Use percentile position instead of seconds as timestamp value in the link": "Use percentile position instead of seconds as timestamp value in the link",
+  "Allows you to open more precise (sub-second) time values. It is recommended to enable this option if you want to open exactly the same frame as when you get the link.":
+    "Allows you to open more precise (sub-second) time values. It is recommended to enable this option if you want to open exactly the same frame as when you get the link.",
   "Show 'open video' icon in the sidebar": "Show 'open video' icon in the sidebar",
   //
   "Seeking Amounts": "Seeking Amounts",

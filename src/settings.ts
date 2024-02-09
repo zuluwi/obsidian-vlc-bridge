@@ -24,6 +24,7 @@ export interface VBPluginSettings {
   alwaysOnTop: boolean;
   pauseOnPasteLink: boolean;
   pauseOnPasteSnapshot: boolean;
+  usePercentagePosition: boolean;
   showSidebarIcon: boolean;
 }
 
@@ -42,6 +43,7 @@ export const DEFAULT_SETTINGS: VBPluginSettings = {
   alwaysOnTop: true,
   pauseOnPasteLink: false,
   pauseOnPasteSnapshot: false,
+  usePercentagePosition: false,
   showSidebarIcon: true,
 };
 
@@ -209,6 +211,17 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         this.plugin.saveSettings();
       });
     });
+    new Setting(containerEl)
+      .setName(t("Use percentile position instead of seconds as timestamp value in the link"))
+      .setDesc(
+        t("Allows you to open more precise (sub-second) time values. It is recommended to enable this option if you want to open exactly the same frame as when you get the link.")
+      )
+      .addToggle((toggle) => {
+        toggle.setValue(this.plugin.settings.usePercentagePosition).onChange((value) => {
+          this.plugin.settings.usePercentagePosition = value;
+          this.plugin.saveSettings();
+        });
+      });
     new Setting(containerEl).setName(t("Show 'open video' icon in the sidebar")).addToggle((toggle) => {
       toggle.setValue(this.plugin.settings.showSidebarIcon).onChange(async (value) => {
         this.plugin.settings.showSidebarIcon = value;

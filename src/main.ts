@@ -12,7 +12,7 @@ declare global {
 export default class VLCBridgePlugin extends Plugin {
   settings: VBPluginSettings;
   openVideoIcon: HTMLElement;
-  openVideo: ({ filePath, subPath, subDelay, time }: { filePath: string; subPath?: string; subDelay?: number; time?: number }) => void;
+  openVideo: ({ filePath, subPath, subDelay, time }: { filePath: string; subPath?: string; subDelay?: number; time?: string }) => void;
   addSubtitle: (filePath: string, subDelay?: number) => void;
   sendVlcRequest: (command: string) => Promise<RequestUrlResponse | undefined>;
   getStatus: () => Promise<RequestUrlResponse>;
@@ -39,9 +39,9 @@ export default class VLCBridgePlugin extends Plugin {
         return new Notice(t("The link does not have a 'mediaPath' parameter to play"));
       }
       mediaPath = decodeURIComponent(mediaPath);
-      var openParams: { filePath: string; subPath?: string; subDelay?: number; time?: number } = { filePath: mediaPath };
+      var openParams: { filePath: string; subPath?: string; subDelay?: number; time?: string } = { filePath: mediaPath };
       if (timestamp) {
-        openParams.time = Number(timestamp);
+        openParams.time = encodeURI(timestamp);
       }
       if (subPath) {
         openParams.subPath = decodeURIComponent(subPath);
@@ -95,6 +95,24 @@ export default class VLCBridgePlugin extends Plugin {
       name: t("Add subtitles"),
       callback: async () => {
         this.subtitleOpen();
+      },
+    });
+
+    this.addCommand({
+      id: "vlc-go-next-frame",
+      name: t("Next frame"),
+      repeatable: true,
+      callback: async () => {
+        this.seekFrame("+");
+      },
+    });
+
+    this.addCommand({
+      id: "vlc-go-previous-frame",
+      name: t("Previous frame"),
+      repeatable: true,
+      callback: async () => {
+        this.seekFrame("-");
       },
     });
 
@@ -207,6 +225,7 @@ export default class VLCBridgePlugin extends Plugin {
   }
 
   onunload() {}
+
   setSidebarIcon = () => {
     if (this.settings.showSidebarIcon) {
       this.openVideoIcon = this.addRibbonIcon("lucide-traffic-cone", t("Select a file to open with VLC Player"), (evt: MouseEvent) => {
@@ -216,6 +235,7 @@ export default class VLCBridgePlugin extends Plugin {
       this.openVideoIcon?.remove();
     }
   };
+
   secondsToTimestamp(seconds: number) {
     return new Date(seconds * 1000).toISOString().slice(seconds < 3600 ? 14 : 11, 19);
   }
@@ -231,16 +251,14 @@ export default class VLCBridgePlugin extends Plugin {
       if (!currentFile) {
         return new Notice(t("No video information available"));
       }
-      var currentTime: number = currentStats.time;
-      var timestamp = this.secondsToTimestamp(currentTime);
+
       var params: {
         mediaPath: string;
-        timestamp: string;
+        timestamp?: string;
         subPath?: string;
         subDelay?: string;
       } = {
         mediaPath: encodeURIComponent(currentFile),
-        timestamp: currentTime.toString(),
       };
 
       if (currentMedia.subtitlePath && currentMedia.mediaPath == currentFile) {
@@ -249,15 +267,25 @@ export default class VLCBridgePlugin extends Plugin {
       if (typeof currentStats.subtitledelay == "number" && currentStats.subtitledelay !== 0) {
         params.subDelay = currentStats.subtitledelay.toString();
       }
+
+      var currentTimeAsSeconds: number = currentStats.time;
+      var timestamp = this.secondsToTimestamp(currentTimeAsSeconds);
+
+      if (this.settings.usePercentagePosition) {
+        params.timestamp = `${currentStats.position * 100}%`;
+      } else {
+        params.timestamp = `${currentTimeAsSeconds}`;
+      }
+
       var paramStr = new URLSearchParams(params).toString();
       resolve(`[${timestamp}](obsidian://vlcBridge?${paramStr})`);
     });
   };
+
   async fileOpen() {
     if (!this.settings.vlcPath) {
       return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
     }
-
     const input = document.createElement("input");
     input.setAttribute("type", "file");
     input.accept = "video/*, audio/*, .mpd, .flv, .mkv";
@@ -276,6 +304,7 @@ export default class VLCBridgePlugin extends Plugin {
 
     input.click();
   }
+
   async subtitleOpen() {
     if (!this.settings.vlcPath) {
       return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
@@ -327,6 +356,31 @@ export default class VLCBridgePlugin extends Plugin {
 
     input.click();
   }
+
+  async seekFrame(prefix: "-" | "+") {
+    try {
+      var status = await this.getStatus();
+    } catch (error) {
+      console.log(error);
+      return new Notice(t("VLC Player must be open to use this command"));
+    }
+    var response: vlcStatusResponse = status.json;
+    var length: number = response.length;
+    var streams = response.information.category;
+    var stream0_key = Object.keys(streams)?.find((key) => {
+      // Assume that stream numbered 0 and containing resolution information is video
+      return key.includes("0") && Object.values(streams[key]).find((value: string) => value.match(/\d+x\d+/g));
+    });
+    if (!stream0_key) return;
+    var stream0 = streams[stream0_key];
+
+    // Assume that the only number value in the video stream object is fps
+    var fps = Number(Object.values(stream0).find((value) => Number(value)));
+
+    // The exact value may not be present because the length is given as an integer instead of exact value
+    this.sendVlcRequest(`seek&val=${encodeURI(`${prefix}${100 / (length * fps)}%`)}`);
+  }
+
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
   }

@@ -8,6 +8,8 @@ export default {
   "Select a file to open with VLC Player": "VLC Player ile açmak için bir dosya seçin",
   "Add subtitles": "Altyazı ekle",
   "A video must be open to add subtitles": "Altyazı ekleyebilmek için bir video açık olmalı",
+  "Next frame": "Sonraki kare",
+  "Previous frame": "Önceki kare",
   "Seek forward": "İleri sar",
   "Seek backward": "Geri sar",
   "Long seek forward": "İleri uzun sar",
@@ -32,6 +34,9 @@ export default {
   "Always show VLC Player on top": "VLC Player'ı her zaman üstte göster",
   "Pause video while pasting timestamp": "Zaman damgası yapıştırırken videoyu duraklat",
   "Pause video while pasting snapshot": "Snapshot yapıştırırken videoyu duraklat",
+  "Use percentile position instead of seconds as timestamp value in the link": "Linkte zaman damgası değeri olarak saniye yerine yüzdelik pozisyonu kullan",
+  "Allows you to open more precise (sub-second) time values. It is recommended to enable this option if you want to open exactly the same frame as when you get the link.":
+    "Daha isabetli zaman değerlerini açmanıza olanak tanır. Eğer tam olarak link aldığınızdaki aynı kareyi açmak istiyorsanız bu ayarı kullanmanız önerilir.",
   "Show 'open video' icon in the sidebar": "Yan çubukta 'video aç' ikonunu göster",
   //
   "Seeking Amounts": "İleri/Geri Sarma Miktarları",

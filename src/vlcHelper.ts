@@ -14,7 +14,6 @@ interface config {
   snapshotFolder: string | null;
   snapshotExt: "png" | "jpg" | "tiff";
   vlcPath: string;
-  lang: string;
 }
 export const currentConfig: config = {
   port: null,
@@ -23,7 +22,6 @@ export const currentConfig: config = {
   snapshotFolder: null,
   snapshotExt: "png",
   vlcPath: "",
-  lang: "en",
 };
 
 export const currentMedia: {
@@ -51,7 +49,7 @@ export interface vlcStatusResponse {
     chapter: number;
     chapters: number[];
     title: number;
-    category: {};
+    category: { [key: string]: { [key: string]: string } };
     titles: number[];
   };
   rate: number;
@@ -184,7 +182,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
       if (current && decodeURIComponent(current.uri) == decodeURIComponent(filePath)) {
         return current;
       } else {
-        // @ts-ignore
         var sameVideoIndex = list.findLastIndex((source: plObject) => source.uri == decodeURIComponent(filePath));
         if (sameVideoIndex !== -1) {
           var sameVideo = list[sameVideoIndex];
@@ -202,7 +199,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     }
   };
 
-  const openVideo = async ({ filePath, subPath, subDelay, time }: { filePath: string; subPath?: string; subDelay?: number; time?: number }) => {
+  const openVideo = async ({ filePath, subPath, subDelay, time }: { filePath: string; subPath?: string; subDelay?: number; time?: string }) => {
     var port_ = currentConfig.port || plugin.settings.port;
     var password_ = currentConfig.password || plugin.settings.password;
 
@@ -221,7 +218,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     if (plInfo) {
       var fileCheck = findVideoFromPl(plInfo, filePath);
 
-      // console.log(filePath, currentConfig.currentFile, filePath == currentConfig.currentFile);
       if (fileCheck) {
         if (fileCheck.current) {
           if (subPath && subPath !== currentMedia.subtitlePath) {
@@ -233,7 +229,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
         } else {
           await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=pl_play&id=${fileCheck.id}`).then(async (response) => {
             if (response.status == 200 && (await waitStreams())) {
-              // currentConfig.currentFile = filePath;
               if (subPath) {
                 addSubtitle(subPath, subDelay);
               }
@@ -255,9 +250,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
             }
           }
         });
-        // if (time) {
-        //   requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${time}`);
-        // }
       }
     } else {
       new Notice(t("Could not connect to VLC Player."));
@@ -318,7 +310,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     `--extraintf=luaintf:http`,
     `--http-port=${plugin.settings.port}`,
     `--http-password=${plugin.settings.password}`,
-    // `--language ${plugin.settings.lang}`,
     `--snapshot-path="${plugin.app.vault.adapter.getFullRealPath(plugin.settings.snapshotFolder)}"`,
     `--snapshot-format="${plugin.settings.snapshotExt}"`,
     `--snapshot-prefix="${plugin.settings.snapshotPrefix}-"`,
@@ -327,8 +318,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
   ];
 
   const launchVLC = async () => {
-    // console.log("launchVlc");
-    // console.log(`"${plugin.settings.vlcPath}" ${vlcExecOptions().join(" ")}`);
     if (await isPortReachable(plugin.settings.port, { host: "localhost" })) {
       return new Notice(t("The port you selected is not usable, please enter another port value"));
     }
@@ -350,15 +339,11 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     currentConfig.vlcPath = plugin.settings.vlcPath;
     currentConfig.port = plugin.settings.port;
     currentConfig.password = plugin.settings.password;
-    currentConfig.lang = plugin.settings.lang;
     currentConfig.snapshotFolder = plugin.settings.snapshotFolder;
     currentConfig.snapshotExt = plugin.settings.snapshotExt;
   };
 
   const launchSyncplay = async () => {
-    // console.log("launchVlc");
-    // console.log(`"${plugin.settings.vlcPath}" ${vlcExecOptions().join(" ")}`);
-
     if (!plugin.settings.syncplayPath) {
       return new Notice(t("Before you can use this command, you need to select 'Syncplay.exe' in the plugin settings"));
     }
@@ -376,7 +361,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     currentConfig.vlcPath = plugin.settings.vlcPath;
     currentConfig.port = plugin.settings.port;
     currentConfig.password = plugin.settings.password;
-    currentConfig.lang = plugin.settings.lang;
     currentConfig.snapshotFolder = plugin.settings.snapshotFolder;
     currentConfig.snapshotExt = plugin.settings.snapshotExt;
   };
