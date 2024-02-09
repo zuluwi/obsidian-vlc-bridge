@@ -75,7 +75,8 @@ If you want to include the subtitle link in the video link, instead of dragging 
 Open the command palette (Ctrl+P) and use the `Take and paste snapshot from video` command to paste a snapshot of the current video with the timestamped link where the cursor is in the editor.
 
 > [!tip]
-> Check `Pause video while pasting snapshot` in Settings
+> - Check `Pause video while pasting snapshot` in Settings
+> - If you want to open the exact frame in the snapshot with the timestamp link, enable `Use percentile position instead of of seconds as timestamp value in the link` in Settings
 
 ### Running Syncplay with plugin arguments
 
