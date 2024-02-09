@@ -53,6 +53,10 @@ export default class VLCBridgePlugin extends Plugin {
       this.openVideo(openParams);
     });
 
+    this.registerObsidianProtocolHandler("vlcBridge-runSyncplay", () => {
+      this.launchSyncplay();
+    });
+
     this.addCommand({
       id: "paste-video-path-with-timestamp",
       name: t("Paste timestamped link of current video"),

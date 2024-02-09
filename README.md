@@ -64,7 +64,8 @@ Link Syntax:
 ```
 
 > [!tip]
-> Check `Pause video while pasting timestamp` in Settings
+>
+> - Check `Pause video while pasting timestamp` in Settings
 
 #### Include Subtitle Link
 
@@ -75,12 +76,16 @@ If you want to include the subtitle link in the video link, instead of dragging 
 Open the command palette (Ctrl+P) and use the `Take and paste snapshot from video` command to paste a snapshot of the current video with the timestamped link where the cursor is in the editor.
 
 > [!tip]
+>
 > - Check `Pause video while pasting snapshot` in Settings
 > - If you want to open the exact frame in the snapshot with the timestamp link, enable `Use percentile position instead of of seconds as timestamp value in the link` in Settings
 
 ### Running Syncplay with plugin arguments
 
 [Syncplay](https://github.com/Syncplay/syncplay?tab=readme-ov-file#syncplay) is an application that connects to an online server to open the preferred player and synchronizes the connected players. By selecting `Syncplay.exe` from the plugin settings and clicking the **Start Syncplay** button, you can start Syncplay so that the plugin interacts with the VLC Player that the app will open.
+
+> [!tip]
+> Create a shortcut with the url `obsidian://vlcBridge-runSyncplay` to open Obsidian and then Syncplay
 
 ## Attributions
 
