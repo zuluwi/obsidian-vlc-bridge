@@ -78,7 +78,7 @@ Open the command palette (Ctrl+P) and use the `Take and paste snapshot from vide
 > [!tip]
 >
 > - Check `Pause video while pasting snapshot` in Settings
-> - If you want to open the exact frame in the snapshot with the timestamp link, enable `Use percentile position instead of of seconds as timestamp value in the link` in Settings
+> - If you want to open the exact frame in the snapshot with the timestamp link, enable `Use percentile position instead of seconds as timestamp value in the link` in Settings
 
 ### Running Syncplay with plugin arguments
 
