@@ -60,7 +60,7 @@ Open the command palette (Ctrl+P) and use the command `Paste timestamped link of
 Link Syntax:
 
 ```
-[<timestamp>](obsidian://vlcBridge?mediaPath=<File URI>&subPath=<File URI or Absolute Path>&subDelay=<in seconds>&timestamp=<in seconds>)
+[<timestamp>](obsidian://vlcBridge?mediaPath=<File URI>&subPath=<File URI or Absolute Path>&subDelay=<in seconds>&timestamp=<in seconds or percentage value>)
 ```
 
 > [!tip]
