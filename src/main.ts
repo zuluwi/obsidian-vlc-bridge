@@ -12,8 +12,8 @@ declare global {
 export default class VLCBridgePlugin extends Plugin {
   settings: VBPluginSettings;
   openVideoIcon: HTMLElement;
-  openVideo: ({ filePath, subPath, subDelay, time }: { filePath: string; subPath?: string; subDelay?: number; time?: string }) => void;
-  addSubtitle: (filePath: string, subDelay?: number) => void;
+  openVideo: (params: ObsidianProtocolData | { mediaPath: string; subPath?: string; subDelay?: string; timestamp?: string }) => void;
+  addSubtitle: (filePath: string, subDelay?: string) => void;
   sendVlcRequest: (command: string) => Promise<RequestUrlResponse | undefined>;
   getStatus: () => Promise<RequestUrlResponse>;
   checkPort: (timeout?: number) => Promise<object | null>;
@@ -23,6 +23,8 @@ export default class VLCBridgePlugin extends Plugin {
 
   async onload() {
     await this.loadSettings();
+    this.setSidebarIcon();
+
     var { getStatus, getCurrentVideo, checkPort, sendVlcRequest, openVideo, launchVLC, launchSyncplay, vlcExecOptions, addSubtitle } = passPlugin(this);
     this.openVideo = openVideo;
     this.addSubtitle = addSubtitle;
@@ -34,28 +36,34 @@ export default class VLCBridgePlugin extends Plugin {
     this.launchSyncplay = launchSyncplay;
 
     this.registerObsidianProtocolHandler("vlcBridge", (params: ObsidianProtocolData) => {
-      var { mediaPath, subPath, subDelay, timestamp } = params;
-      if (!mediaPath) {
-        return new Notice(t("The link does not have a 'mediaPath' parameter to play"));
-      }
-      mediaPath = decodeURIComponent(mediaPath);
-      var openParams: { filePath: string; subPath?: string; subDelay?: number; time?: string } = { filePath: mediaPath };
-      if (timestamp) {
-        openParams.time = encodeURI(timestamp);
-      }
-      if (subPath) {
-        openParams.subPath = decodeURIComponent(subPath);
-      }
-      if (subDelay) {
-        openParams.subDelay = Number(subDelay);
-      }
-
-      this.openVideo(openParams);
+      this.openVideo(params);
     });
 
     this.registerObsidianProtocolHandler("vlcBridge-runSyncplay", () => {
       this.launchSyncplay();
     });
+
+    // Reference: https://discord.com/channels/686053708261228577/840286264964022302/1085905134409752576 | @lemons_dev
+    // const plugin = this;
+    // this.app.workspace.openLinkText = (function (_super) {
+    //   return function () {
+    //     console.log("Function Mixin openLinkText", arguments, Object.fromEntries(new URLSearchParams(arguments[0]).entries()));
+    //     let linktext = arguments[0] as string;
+    //     if (linktext.toLowerCase().startsWith("vlcbridge?")) {
+    //       let vlcParams = Object.fromEntries(new URLSearchParams(linktext.substring(10)).entries());
+    //       console.log(vlcParams);
+
+    //       if (vlcParams.mediaPath) {
+    //         plugin.openVideo(vlcParams as { mediaPath: string; subPath?: string; subDelay?: string; timestamp?: string });
+    //       } else {
+    //         return _super.apply(this, arguments);
+    //       }
+    //     } else {
+    //       // @ts-ignore
+    //       return _super.apply(this, arguments);
+    //     }
+    //   };
+    // })(this.app.workspace.openLinkText);
 
     this.addCommand({
       id: "paste-video-path-with-timestamp",
@@ -72,7 +80,10 @@ export default class VLCBridgePlugin extends Plugin {
           return new Notice(t("VLC Player must be open to use this command"));
           // }
         }
-        editor.replaceSelection(`${await this.getTimestampLink(status)} `);
+        var timestampLink = await this.getTimestampLink(status);
+        var templateStr = this.settings.timestampLinkTemplate.replace(/{{timestamplink}}/g, timestampLink.link);
+
+        editor.replaceSelection(`${templateStr}`);
       },
     });
 
@@ -194,33 +205,51 @@ export default class VLCBridgePlugin extends Plugin {
         if (this.settings.pauseOnPasteSnapshot) {
           this.sendVlcRequest("pl_forcepause");
         }
-        var beforeReq = Date.now();
-        this.sendVlcRequest(`snapshot`)
-          .then(async (response: RequestUrlResponse) => {
-            if (response.status == 200) {
-              var afterReq = Date.now();
-              var currentFile = await this.getCurrentVideo();
+        try {
+          var beforeReq = Date.now();
+          let response = (await this.sendVlcRequest(`snapshot`)) as RequestUrlResponse;
+          // .then(async (response: RequestUrlResponse) => {
+          if (response.status == 200) {
+            var afterReq = Date.now();
+            var currentFile = await this.getCurrentVideo();
 
-              var snapshot =
-                // @ts-nocheck
-                // Object.values(this.app.vault.adapter.files)
-                //   .filter((f) => f.type == "file" && f.realpath.startsWith("vlcSnapshots") && f.mtime > beforeReq && f.mtime < afterReq)
-                this.app.vault
-                  .getFiles()
-                  .filter((f) => f.path.startsWith(`${currentConfig.snapshotFolder || this.settings.snapshotFolder}/`) && f.stat.mtime > beforeReq && f.stat.mtime < afterReq)
-                  ?.first();
-              if (snapshot) {
-                editor.replaceSelection(`${currentFile ? `${await this.getTimestampLink(response)}` : `${this.secondsToTimestamp(response.json.time)}`}\n![](${snapshot.path})\n`);
-              } else {
-                new Notice(t("Snapshot not found, if you made a change to the snapshot folder name, try restarting VLC."));
-              }
+            var snapshot =
+              // @ts-nocheck
+              // Object.values(this.app.vault.adapter.files)
+              //   .filter((f) => f.type == "file" && f.realpath.startsWith("vlcSnapshots") && f.mtime > beforeReq && f.mtime < afterReq)
+              this.app.vault
+                .getFiles()
+                .filter((f) => f.path.startsWith(`${currentConfig.snapshotFolder || this.settings.snapshotFolder}/`) && f.stat.mtime > beforeReq && f.stat.mtime < afterReq)
+                ?.first();
+            if (snapshot) {
+              var currentStats: vlcStatusResponse = response?.json;
+
+              var timestampLink = await this.getTimestampLink(status);
+              var filename = currentStats.information.category.meta.filename;
+
+              var snapshotLinktext = this.settings.snapshotLinktext.replace(/{{filename}}/g, filename).replace(/{{timestamp}}/g, timestampLink.timestamp);
+              var snapshotEmbed = `![[${snapshot.path} | ${snapshotLinktext}]]`;
+              var templateStr = this.settings.snapshotLinkTemplate
+                .replace(/{{timestamplink}}/g, timestampLink.link)
+                .replace(/{{snapshot}}/g, snapshotEmbed)
+                .replace(/{{filename}}/g, filename)
+                .replace(/{{timestamp}}/g, timestampLink.timestamp);
+
+              editor.replaceSelection(templateStr);
+              // editor.replaceSelection(`${currentFile ? `${await this.getTimestampLink(response)}` : `${this.secondsToTimestamp(response.json.time)}`}\n![](${snapshot.path})\n`);
             } else {
-              console.log("request error", response.status, response);
+              new Notice(t("Snapshot not found, if you made a change to the snapshot folder name, try restarting VLC."));
             }
-          })
-          .catch((err: Error) => {
-            console.log("Snapshot error", err);
-          });
+          } else {
+            console.log("request error", response.status, response);
+          }
+          // })
+          // .catch((err: Error) => {
+          //   console.log("Snapshot error", err);
+          // });
+        } catch (err) {
+          console.log("Snapshot error", err);
+        }
       },
     });
 
@@ -245,7 +274,7 @@ export default class VLCBridgePlugin extends Plugin {
   }
 
   getTimestampLink = async (response: RequestUrlResponse) => {
-    return new Promise<string>(async (resolve, reject) => {
+    return new Promise<{ link: string; timestamp: string }>(async (resolve, reject) => {
       var currentStats: vlcStatusResponse = response?.json;
       if (!currentStats) {
         reject();
@@ -272,8 +301,10 @@ export default class VLCBridgePlugin extends Plugin {
         params.subDelay = currentStats.subtitledelay.toString();
       }
 
-      var currentTimeAsSeconds: number = currentStats.time;
+      var currentTimeAsSeconds: number = currentStats.time + this.settings.timestampOffset;
       var timestamp = this.secondsToTimestamp(currentTimeAsSeconds);
+
+      var filename = currentStats.information.category.meta.filename;
 
       if (this.settings.usePercentagePosition) {
         params.timestamp = `${currentStats.position * 100}%`;
@@ -282,7 +313,10 @@ export default class VLCBridgePlugin extends Plugin {
       }
 
       var paramStr = new URLSearchParams(params).toString();
-      resolve(`[${timestamp}](obsidian://vlcBridge?${paramStr})`);
+      var linktext = this.settings.timestampLinktext.replace(/{{timestamp}}/g, timestamp).replace(/{{filename}}/g, filename);
+      var timestampLink = `[${linktext}](obsidian://vlcBridge?${paramStr})`;
+      // var templateStr = this.settings.timestampLinkTemplate.replace(/{{timestamplink}}/g, timestampLink);
+      resolve({ link: timestampLink, timestamp });
     });
   };
 
@@ -300,7 +334,7 @@ export default class VLCBridgePlugin extends Plugin {
 
         var fileURI = new URL(file.path).href;
         // console.log(fileURI);
-        this.openVideo({ filePath: fileURI });
+        this.openVideo({ mediaPath: fileURI });
 
         input.remove();
       }

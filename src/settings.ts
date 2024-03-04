@@ -1,4 +1,4 @@
-import { App, Notice, PluginSettingTab, Setting, MarkdownRenderer } from "obsidian";
+import { App, Notice, PluginSettingTab, Setting, MarkdownRenderer, SliderComponent, TextComponent } from "obsidian";
 import VLCBridgePlugin from "./main";
 import { t } from "./language/helpers";
 import { currentConfig } from "./vlcHelper";
@@ -24,8 +24,13 @@ export interface VBPluginSettings {
   alwaysOnTop: boolean;
   pauseOnPasteLink: boolean;
   pauseOnPasteSnapshot: boolean;
+  timestampOffset: number;
   usePercentagePosition: boolean;
   showSidebarIcon: boolean;
+  timestampLinktext: string;
+  timestampLinkTemplate: string;
+  snapshotLinktext: string;
+  snapshotLinkTemplate: string;
 }
 
 export const DEFAULT_SETTINGS: VBPluginSettings = {
@@ -43,8 +48,13 @@ export const DEFAULT_SETTINGS: VBPluginSettings = {
   alwaysOnTop: true,
   pauseOnPasteLink: false,
   pauseOnPasteSnapshot: false,
+  timestampOffset: 0,
   usePercentagePosition: false,
   showSidebarIcon: true,
+  timestampLinktext: "{{timestamp}}",
+  timestampLinkTemplate: "{{timestamplink}} ",
+  snapshotLinktext: "{{filename}} {{timestamp}}",
+  snapshotLinkTemplate: "{{timestamplink}} \n{{snapshot}} \n",
 };
 
 const snapshotExts: {
@@ -69,19 +79,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     const { containerEl } = this;
 
     containerEl.empty();
-
-    // new Setting(containerEl)
-    //   .setName("Setting #1")
-    //   .setDesc("It's a secret")
-    //   .addText((text) =>
-    //     text
-    //       .setPlaceholder("Enter your secret")
-    //       .setValue(this.plugin.settings.mySetting)
-    //       .onChange(async (value) => {
-    //         this.plugin.settings.mySetting = value;
-    //         await this.plugin.saveSettings();
-    //       })
-    //   );
 
     const isPortAvailable = (port: number) => {
       return new Promise<boolean>(async (resolve) => {
@@ -114,10 +111,33 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       };
     };
 
-    const setCopyBtnDesc = () => {
+    const setSettingDesc = () => {
       syncplayArgEl.setDesc(`"${this.plugin.settings.syncplayPath}" --player-path "${this.plugin.settings.vlcPath}" -- ${this.plugin.vlcExecOptions().join(" ")}`);
       copyUrlEl.setDesc(`http://:${this.plugin.settings.password}@localhost:${this.plugin.settings.port}/`);
       copyCommandEl.setDesc(`"${this.plugin.settings.vlcPath}" ${this.plugin.vlcExecOptions().join(" ")}`);
+
+      tsLinkTextSetting.setDesc(
+        createFragment((el) => {
+          MarkdownRenderer.render(
+            this.app,
+            `## \\[ **${this.plugin.settings.timestampLinktext}** ]( {{vlcBridge URI}} ) \n#### ${t("Placeholders")} \n- \`{{filename}}\` \n- \`{{timestamp}}\` \n`,
+            el.createDiv(),
+            "",
+            this.plugin
+          );
+        })
+      );
+      ssLinkTextSetting.setDesc(
+        createFragment((el) => {
+          MarkdownRenderer.render(
+            this.app,
+            `## \\!\\[[ {{${t("Snapshot Path")}}} | **${this.plugin.settings.snapshotLinktext}** ]] \n#### ${t("Placeholders")} \n- \`{{filename}}\` \n- \`{{timestamp}}\` \n`,
+            el.createDiv(),
+            "",
+            this.plugin
+          );
+        })
+      );
 
       // copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`);
       // if (/\s/.test(this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder))) {
@@ -153,7 +173,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
               this.plugin.settings.vlcPath = file.path;
               selectVLCDescEl.innerText = file.path;
               await this.plugin.saveSettings();
-              setCopyBtnDesc();
+              setSettingDesc();
 
               input.remove();
             }
@@ -181,7 +201,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
               text.inputEl.style.borderColor = "currentColor";
               this.plugin.settings.port = Number(value);
               await this.plugin.saveSettings();
-              setCopyBtnDesc();
+              setSettingDesc();
             }
           });
         // var portCheck = await getPort({ port: this.plugin.settings.port });
@@ -192,11 +212,18 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         }
       });
 
+    new Setting(containerEl).setName(t("Show 'open video' icon in the sidebar")).addToggle((toggle) => {
+      toggle.setValue(this.plugin.settings.showSidebarIcon).onChange(async (value) => {
+        this.plugin.settings.showSidebarIcon = value;
+        await this.plugin.saveSettings();
+        this.plugin.setSidebarIcon();
+      });
+    });
     new Setting(containerEl).setName(t("Always show VLC Player on top")).addToggle((toggle) => {
       toggle.setValue(this.plugin.settings.alwaysOnTop).onChange(async (value) => {
         this.plugin.settings.alwaysOnTop = value;
         await this.plugin.saveSettings();
-        setCopyBtnDesc();
+        setSettingDesc();
       });
     });
     new Setting(containerEl).setName(t("Pause video while pasting timestamp")).addToggle((toggle) => {
@@ -217,18 +244,161 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         t("Allows you to open more precise (sub-second) time values. It is recommended to enable this option if you want to open exactly the same frame as when you get the link.")
       )
       .addToggle((toggle) => {
-        toggle.setValue(this.plugin.settings.usePercentagePosition).onChange((value) => {
+        toggle.setValue(this.plugin.settings.usePercentagePosition).onChange(async (value) => {
           this.plugin.settings.usePercentagePosition = value;
-          this.plugin.saveSettings();
+          await this.plugin.saveSettings();
+          this.display();
         });
       });
-    new Setting(containerEl).setName(t("Show 'open video' icon in the sidebar")).addToggle((toggle) => {
-      toggle.setValue(this.plugin.settings.showSidebarIcon).onChange(async (value) => {
-        this.plugin.settings.showSidebarIcon = value;
-        await this.plugin.saveSettings();
-        this.plugin.setSidebarIcon();
-      });
-    });
+
+    if (!this.plugin.settings.usePercentagePosition) {
+      let tsOffsetSlider: SliderComponent;
+      let tsOffsetText: TextComponent;
+      new Setting(containerEl)
+        .setName(t("Timestamp Offset"))
+        .addSlider((slider) => {
+          tsOffsetSlider = slider;
+          slider
+            .setLimits(-60, 60, 1)
+            .setDynamicTooltip()
+            .setValue(this.plugin.settings.timestampOffset)
+            .onChange(async (value) => {
+              this.plugin.settings.timestampOffset = value;
+              await this.plugin.saveSettings();
+              tsOffsetText.setValue(this.plugin.settings.timestampOffset.toString());
+            });
+          return slider;
+        })
+        .addText((text) => {
+          tsOffsetText = text;
+          text.setValue(this.plugin.settings.timestampOffset.toString()).onChange(async (value) => {
+            if (!Number.isInteger(Number(value))) {
+              text.inputEl.style.borderColor = "red";
+            } else {
+              text.inputEl.style.borderColor = "currentColor";
+              this.plugin.settings.timestampOffset = Number(value);
+              await this.plugin.saveSettings();
+              tsOffsetSlider.setValue(this.plugin.settings.timestampOffset);
+            }
+          });
+
+          text.inputEl.style.width = "5em";
+          return text;
+        });
+    }
+
+    containerEl.createEl("h1", { text: t("Link Templates") });
+
+    containerEl.createEl("h2", { text: t("Timestamp Link") });
+
+    let tsLinkTextSetting = new Setting(containerEl)
+      .setName(t("Timestamp Linktext"))
+      .addText((text) => {
+        text
+          .setPlaceholder(this.plugin.settings.timestampLinktext)
+          .setValue(this.plugin.settings.timestampLinktext)
+          .onChange(async (value) => {
+            this.plugin.settings.timestampLinktext = value;
+            await this.plugin.saveSettings();
+            setSettingDesc();
+          });
+        text.inputEl.style.width = "20em";
+        return text;
+      })
+      .addExtraButton((button) =>
+        button.setIcon("lucide-rotate-ccw").onClick(async () => {
+          this.plugin.settings.timestampLinktext = DEFAULT_SETTINGS.timestampLinktext;
+          await this.plugin.saveSettings();
+          this.display();
+        })
+      );
+
+    new Setting(containerEl)
+      .setName(t("Timestamp Template"))
+      .setDesc(
+        createFragment((el) => {
+          MarkdownRenderer.render(this.app, `#### ${t("Placeholders")} \n- \`{{timestamplink}}\` \n- \`{{filename}}\` \n- \`{{timestamp}}\`\n`, el.createDiv(), "", this.plugin);
+        })
+      )
+      .addTextArea((text) => {
+        text
+          .setPlaceholder(this.plugin.settings.timestampLinkTemplate)
+          .setValue(this.plugin.settings.timestampLinkTemplate)
+          .onChange(async (value) => {
+            this.plugin.settings.timestampLinkTemplate = value;
+            this.plugin.saveSettings();
+          });
+
+        text.inputEl.cols = 50;
+        text.inputEl.rows = 5;
+
+        return text;
+      })
+      .addExtraButton((button) =>
+        button.setIcon("lucide-rotate-ccw").onClick(async () => {
+          this.plugin.settings.timestampLinkTemplate = DEFAULT_SETTINGS.timestampLinkTemplate;
+          await this.plugin.saveSettings();
+          this.display();
+        })
+      );
+
+    containerEl.createEl("h2", { text: t("Snapshot Embed") });
+
+    let ssLinkTextSetting = new Setting(containerEl)
+      .setName(t("Snapshot Linktext"))
+      .addText((text) => {
+        text
+          .setPlaceholder(this.plugin.settings.snapshotLinktext)
+          .setValue(this.plugin.settings.snapshotLinktext)
+          .onChange(async (value) => {
+            this.plugin.settings.snapshotLinktext = value;
+            await this.plugin.saveSettings();
+            setSettingDesc();
+          });
+        text.inputEl.style.width = "20em";
+        return text;
+      })
+      .addExtraButton((button) =>
+        button.setIcon("lucide-rotate-ccw").onClick(async () => {
+          this.plugin.settings.snapshotLinktext = DEFAULT_SETTINGS.snapshotLinktext;
+          await this.plugin.saveSettings();
+          this.display();
+        })
+      );
+    new Setting(containerEl)
+      .setName(t("Snapshot Template"))
+      .setDesc(
+        createFragment((el) => {
+          MarkdownRenderer.render(
+            this.app,
+            `#### ${t("Placeholders")} \n- \`{{snapshot}}\` \n- \`{{timestamplink}}\` \n- \`{{filename}}\` \n- \`{{timestamp}}\`\n`,
+            el.createDiv(),
+            "",
+            this.plugin
+          );
+        })
+      )
+      .addTextArea((text) => {
+        text
+          .setPlaceholder(this.plugin.settings.snapshotLinkTemplate)
+          .setValue(this.plugin.settings.snapshotLinkTemplate)
+          .onChange(async (value) => {
+            this.plugin.settings.snapshotLinkTemplate = value;
+            this.plugin.saveSettings();
+          });
+
+        text.inputEl.cols = 50;
+        text.inputEl.rows = 5;
+
+        return text;
+      })
+      .addExtraButton((button) =>
+        button.setIcon("lucide-rotate-ccw").onClick(async () => {
+          this.plugin.settings.snapshotLinkTemplate = DEFAULT_SETTINGS.snapshotLinkTemplate;
+          await this.plugin.saveSettings();
+          this.display();
+        })
+      );
 
     containerEl.createEl("h1", { text: t("Seeking Amounts") });
 
@@ -283,7 +453,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
               }
               this.plugin.settings.snapshotFolder = value;
               await this.plugin.saveSettings();
-              setCopyBtnDesc();
+              setSettingDesc();
             }
           })
       );
@@ -298,7 +468,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           .onChange(async (value: "png" | "jpg" | "tiff") => {
             this.plugin.settings.snapshotExt = value;
             await this.plugin.saveSettings();
-            setCopyBtnDesc();
+            setSettingDesc();
           });
       });
 
@@ -324,7 +494,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
                 this.plugin.settings.syncplayPath = file.path;
                 selectSPDescEl.innerText = file.path;
                 await this.plugin.saveSettings();
-                setCopyBtnDesc();
+                setSettingDesc();
 
                 input.remove();
               }
@@ -374,7 +544,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     //     }
     //   })
     // );
-    setCopyBtnDesc();
+    setSettingDesc();
 
     //
   }

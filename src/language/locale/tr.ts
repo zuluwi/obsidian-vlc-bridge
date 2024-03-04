@@ -38,6 +38,17 @@ export default {
   "Allows you to open more precise (sub-second) time values. It is recommended to enable this option if you want to open exactly the same frame as when you get the link.":
     "Daha isabetli zaman değerlerini açmanıza olanak tanır. Eğer tam olarak link aldığınızdaki aynı kareyi açmak istiyorsanız bu ayarı kullanmanız önerilir.",
   "Show 'open video' icon in the sidebar": "Yan çubukta 'video aç' ikonunu göster",
+  "Timestamp Offset": "Zaman Damgası Gecikmesi",
+  //
+  "Link Templates": "Link Şablonları",
+  "Timestamp Link": "Zaman Damgası Linki",
+  "Timestamp Linktext": "Zaman Damgası Link Yazısı",
+  "Timestamp Template": "Zaman Damgası Şablonu",
+  "Snapshot Embed": "Snapshot",
+  "Snapshot Path": "Snapshot Adresi",
+  "Snapshot Linktext": "Snapshot Açıklaması",
+  "Snapshot Template": "Snapshot Şablonu",
+  Placeholders: "Kullanılabilir Bilgiler",
   //
   "Seeking Amounts": "İleri/Geri Sarma Miktarları",
   "Normal Seek Amount (in seconds)": "Normal İleri/Geri Sarma Miktarı (saniye cinsinden)",

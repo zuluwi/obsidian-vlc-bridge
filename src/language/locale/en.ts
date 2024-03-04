@@ -38,6 +38,17 @@ export default {
   "Allows you to open more precise (sub-second) time values. It is recommended to enable this option if you want to open exactly the same frame as when you get the link.":
     "Allows you to open more precise (sub-second) time values. It is recommended to enable this option if you want to open exactly the same frame as when you get the link.",
   "Show 'open video' icon in the sidebar": "Show 'open video' icon in the sidebar",
+  "Timestamp Offset": "Timestamp Offset",
+  //
+  "Link Templates": "Link Templates",
+  "Timestamp Link": "Timestamp Link",
+  "Timestamp Linktext": "Timestamp Linktext",
+  "Timestamp Template": "Timestamp Template",
+  "Snapshot Embed": "Snapshot Embed",
+  "Snapshot Path": "Snapshot Path",
+  "Snapshot Linktext": "Snapshot Linktext",
+  "Snapshot Template": "Snapshot Template",
+  Placeholders: "Placeholders",
   //
   "Seeking Amounts": "Seeking Amounts",
   "Normal Seek Amount (in seconds)": "Normal Seek Amount (in seconds)",
