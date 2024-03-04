@@ -82,7 +82,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     const isPortAvailable = (port: number) => {
       return new Promise<boolean>(async (resolve) => {
-        var isPortInUse = await isPortReachable(port, { host: "localhost" });
+        const isPortInUse = await isPortReachable(port, { host: "localhost" });
         if (isPortInUse) {
           if ((port == this.plugin.settings.port || port == currentConfig.port) && (await this.plugin.checkPort())) {
             resolve(true);
@@ -98,18 +98,18 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     let copyUrlEl: Setting;
     let copyCommandEl: Setting;
     let syncplayArgEl: Setting;
-    let copyArgEl: Setting;
+    // let copyArgEl: Setting;
 
-    const splittedPath = () => {
-      let dirPathArg = "--snapshot-path=" + this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder);
-      return {
-        1: `${dirPathArg
-          .split(" ")
-          .map((str) => `'${str}'`)
-          .join(", ")}`,
-        2: `'${dirPathArg}'`,
-      };
-    };
+    // const splittedPath = () => {
+    //   let dirPathArg = "--snapshot-path=" + this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder);
+    //   return {
+    //     1: `${dirPathArg
+    //       .split(" ")
+    //       .map((str) => `'${str}'`)
+    //       .join(", ")}`,
+    //     2: `'${dirPathArg}'`,
+    //   };
+    // };
 
     const setSettingDesc = () => {
       syncplayArgEl.setDesc(`"${this.plugin.settings.syncplayPath}" --player-path "${this.plugin.settings.vlcPath}" -- ${this.plugin.vlcExecOptions().join(" ")}`);
@@ -156,8 +156,8 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       //
     };
 
-    var selectVLCDescEl: HTMLElement;
-    var selectVLC = new Setting(containerEl)
+    let selectVLCDescEl: HTMLElement;
+    const selectVLC = new Setting(containerEl)
       .setName(t("VLC Path"))
       .setDesc(t("Select 'vlc.exe' from the folder where VLC Player is installed"))
       .addButton((btn) => {
@@ -166,9 +166,9 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           input.setAttribute("type", "file");
           input.accept = ".exe";
           input.onchange = async (e: Event) => {
-            var files = (e.target as HTMLInputElement)?.files as FileList;
+            const files = (e.target as HTMLInputElement)?.files as FileList;
             for (let i = 0; i < files.length; i++) {
-              var file = files[i];
+              const file = files[i];
 
               this.plugin.settings.vlcPath = file.path;
               selectVLCDescEl.innerText = file.path;
@@ -291,7 +291,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: t("Timestamp Link") });
 
-    let tsLinkTextSetting = new Setting(containerEl)
+    const tsLinkTextSetting = new Setting(containerEl)
       .setName(t("Timestamp Linktext"))
       .addText((text) => {
         text
@@ -344,7 +344,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: t("Snapshot Embed") });
 
-    let ssLinkTextSetting = new Setting(containerEl)
+    const ssLinkTextSetting = new Setting(containerEl)
       .setName(t("Snapshot Linktext"))
       .addText((text) => {
         text
@@ -432,7 +432,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     containerEl.createEl("h1", { text: t("Snapshot") });
 
-    var folderNamePattern = /^[A-Za-z0-9][^\\\/\<\>\"\*\:\|\?]*$/gi;
+    const folderNamePattern = /^[A-Za-z0-9][^\\\/\<\>\"\*\:\|\?]*$/gi;
     new Setting(containerEl)
       .setName(t("Snapshot folder"))
       .setDesc(t("Enter the folder name where snapshots will be saved in the vault"))
@@ -474,8 +474,8 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     containerEl.createEl("h1", { text: "Syncplay" });
 
-    var selectSPDescEl: HTMLElement;
-    var selectSP = new Setting(containerEl)
+    let selectSPDescEl: HTMLElement;
+    const selectSP = new Setting(containerEl)
       .setName(t("Syncplay Path"))
       .setDesc(t("Select 'Syncplay.exe' from the folder where Syncplay is installed"))
       .addButton((btn) => {
@@ -487,9 +487,9 @@ export class VBPluginSettingsTab extends PluginSettingTab {
             input.setAttribute("type", "file");
             input.accept = ".exe";
             input.onchange = async (e: Event) => {
-              var files = (e.target as HTMLInputElement)?.files as FileList;
+              const files = (e.target as HTMLInputElement)?.files as FileList;
               for (let i = 0; i < files.length; i++) {
-                var file = files[i];
+                const file = files[i];
 
                 this.plugin.settings.syncplayPath = file.path;
                 selectSPDescEl.innerText = file.path;
