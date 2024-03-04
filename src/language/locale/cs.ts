@@ -1,0 +1,2 @@
+// čeština
+export default {};

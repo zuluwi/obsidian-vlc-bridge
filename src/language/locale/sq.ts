@@ -1,0 +1,2 @@
+// Shqip
+export default {};

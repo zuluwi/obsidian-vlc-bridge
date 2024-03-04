@@ -1,0 +1,2 @@
+// Română
+export default {};

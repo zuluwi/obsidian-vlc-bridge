@@ -1,0 +1,2 @@
+// Bahasa Melayu
+export default {};
