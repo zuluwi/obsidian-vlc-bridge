@@ -65,7 +65,6 @@ export interface vlcStatusResponse {
   equalizer: [];
 }
 
-// export var isVlcOpen: boolean | null = null;
 let checkTimeout: ReturnType<typeof setTimeout> | undefined;
 let checkInterval: ReturnType<typeof setInterval> | undefined;
 
@@ -206,13 +205,12 @@ export function passPlugin(plugin: VLCBridgePlugin) {
   };
 
   const openVideo = async (params: ObsidianProtocolData | { mediaPath: string; subPath?: string; subDelay?: string; timestamp?: string }) => {
-    // const openVideo = async (params: ObsidianProtocolData) => {
     let { mediaPath, subPath, subDelay, timestamp } = params;
     if (!mediaPath) {
       return new Notice(t("The link does not have a 'mediaPath' parameter to play"));
     }
     mediaPath = decodeURIComponent(mediaPath);
-    // var openParams: { filePath: string; subPath?: string; subDelay?: number; time?: string } = { filePath: mediaPath };
+
     if (timestamp) {
       timestamp = encodeURI(timestamp);
     }
@@ -261,7 +259,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
       } else {
         await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=in_play&input=${encodeURIComponent(mediaPath)}`).then(async (response) => {
           if (response.status == 200 && (await waitStreams())) {
-            // currentConfig.currentFile = filePath;
             if (subPath) {
               addSubtitle(subPath, subDelay);
             }
@@ -309,7 +306,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
 
     if (filePath.startsWith("file:///")) {
       filePath = fileURLToPath(filePath);
-      // filePath = filePath.substring(7).replace(/\//g, "\\");
     }
 
     requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=addsubtitle&val=${encodeURIComponent(filePath)}`).then(async (response) => {

@@ -74,8 +74,6 @@ export default {
   Extra: "Extra",
   "Copy VLC Web Interface link": "Copy VLC Web Interface link",
   "Copy command line code": "Copy command line code",
-  // "Copy arguments for starting VLC (for Syncplay)": "Copy arguments for starting VLC (for Syncplay)",
-  // "syncplay argument instructions": "You will get an error when you open VLC with Syncplay because the Snapshot folder path contains spaces. To fix this, paste the arguments and click the **`Store configuration and run Syncplay`** button to start the program once and close it. The arguments will be saved in the **`syncplay.ini`** file where Syncplay is installed, open this file and merge the **`#1#`** in the *`perplayerarguments`* object into **`#2#`** and save the file. Then open Syncplay and run it.",
   "Copy to clipboard": "Copy to clipboard",
   "Copied to clipboard": "Copied to clipboard",
 

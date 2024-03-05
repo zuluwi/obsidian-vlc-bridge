@@ -98,18 +98,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     let copyUrlEl: Setting;
     let copyCommandEl: Setting;
     let syncplayArgEl: Setting;
-    // let copyArgEl: Setting;
-
-    // const splittedPath = () => {
-    //   let dirPathArg = "--snapshot-path=" + this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder);
-    //   return {
-    //     1: `${dirPathArg
-    //       .split(" ")
-    //       .map((str) => `'${str}'`)
-    //       .join(", ")}`,
-    //     2: `'${dirPathArg}'`,
-    //   };
-    // };
 
     const setSettingDesc = () => {
       syncplayArgEl.setDesc(`"${this.plugin.settings.syncplayPath}" --player-path "${this.plugin.settings.vlcPath}" -- ${this.plugin.vlcExecOptions().join(" ")}`);
@@ -138,22 +126,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           );
         })
       );
-
-      // copyArgEl.setDesc(`${this.plugin.vlcExecOptions().join(" ").replace(/["]/g, "")}`);
-      // if (/\s/.test(this.plugin.app.vault.adapter.getFullRealPath(this.plugin.settings.snapshotFolder))) {
-      //   MarkdownRenderer.render(
-      //     this.app,
-      //     `> [!warning]\n> ${t("syncplay argument instructions").replace("#1#", splittedPath()[1]).replace("#2#", splittedPath()[2])}`,
-      //     copyArgEl.descEl,
-      //     "",
-      //     this.plugin
-      //   );
-      // }
-
-      // .createDiv()
-      // .createEl("code", { text: `${splittedPath()}` });
-
-      //
     };
 
     let selectVLCDescEl: HTMLElement;
@@ -204,7 +176,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
               setSettingDesc();
             }
           });
-        // var portCheck = await getPort({ port: this.plugin.settings.port });
 
         if (!(await isPortAvailable(this.plugin.settings.port))) {
           text.inputEl.style.borderColor = "red";
@@ -533,19 +504,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         }
       })
     );
-    // copyArgEl = new Setting(containerEl).setName(t("Copy arguments for starting VLC (for Syncplay)")).addButton((btn) =>
-    //   btn.setButtonText(t("Copy to clipboard")).onClick(async () => {
-    //     if (await isPortAvailable(this.plugin.settings.port)) {
-    //       // await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim().replace(/["]/g, "")}`);
-    //       await navigator.clipboard.writeText(`${this.plugin.vlcExecOptions().join(" ").trim()}`);
-    //       new Notice(t("Copied to clipboard"));
-    //     } else {
-    //       new Notice(t("The port you selected is not usable, please enter another port value"));
-    //     }
-    //   })
-    // );
-    setSettingDesc();
 
-    //
+    setSettingDesc();
   }
 }

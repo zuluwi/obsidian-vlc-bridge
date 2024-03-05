@@ -74,8 +74,6 @@ export default {
   Extra: "Ekstra",
   "Copy VLC Web Interface link": "VLC Web Interface linkini kopyala",
   "Copy command line code": "Komut satırı kodunu kopyala",
-  // "Copy arguments for starting VLC (for Syncplay)": "VLC'yi başlatma argümanlarını kopyala (Syncplay için)",
-  // "syncplay argument instructions": "Snapshot klasör yolu boşluk barındırdığı için Syncplay ile VLC'yi açtığınızda hata alacaksınız. Bunu düzeltmek için argümanları yapıştırıp **`Yapılandırmayı depolayın ve Syncplay'i çalıştırın`** butonuna tıklayarak bir kere başlatıp programı kapatın. Argümanlar Syncplay'in kurulu olduğu **`syncplay.ini`** dosyasına kaydedilmiş olacak, bu dosyayı açıp *`perplayerarguments`* objesinde bulunan **`#1#`** kısmını birleştirerek **`#2#`** haline getirin ve dosyayı kaydedin. Ardından Syncplay'i açıp çalıştırın.",
   "Copy to clipboard": "Panoya kopyala",
   "Copied to clipboard": "Panoya kopyalandı",
 
