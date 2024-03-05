@@ -1,0 +1,2 @@
+// ไทย
+export default {};

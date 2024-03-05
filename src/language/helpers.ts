@@ -1,5 +1,7 @@
 // Source: https://github.com/mgmeyers/obsidian-kanban/blob/main/src/lang/helpers.ts
 
+// moment.locale() returns "en" for "am - አማርኛ" and "kh - ខ្មែរ"
+
 import { moment } from "obsidian";
 import ar from "./locale/ar";
 import cs from "./locale/cs";
@@ -24,6 +26,7 @@ import ptBR from "./locale/pt-br";
 import ro from "./locale/ro";
 import ru from "./locale/ru";
 import sq from "./locale/sq";
+import th from "./locale/th";
 import tr from "./locale/tr";
 import uk from "./locale/uk";
 import vi from "./locale/vi";
@@ -54,6 +57,7 @@ const localeMap: { [k: string]: Partial<typeof en> } = {
   ro,
   ru,
   sq,
+  th,
   tr,
   uk,
   vi,
