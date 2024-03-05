@@ -1,10 +1,10 @@
 {
-  "id": "vlc-bridge",
-  "name": "VLC Bridge",
-  "version": "0.0.5",
-  "minAppVersion": "0.15.0",
-  "description": "It allows you to control VLC Player via Obsidian and add a timestamped link or snapshot from the current video to your note. By clicking on these timestamped links, you can reopen the video at the specified time in VLC Player.",
-  "author": "zuluwi",
-  "authorUrl": "https://github.com/zuluwi",
-  "isDesktopOnly": true
+	"id": "vlc-bridge",
+	"name": "VLC Bridge",
+	"version": "0.0.6",
+	"minAppVersion": "0.15.0",
+	"description": "It allows you to control VLC Player via Obsidian and add a timestamped link or snapshot from the current video to your note. By clicking on these timestamped links, you can reopen the video at the specified time in VLC Player.",
+	"author": "zuluwi",
+	"authorUrl": "https://github.com/zuluwi",
+	"isDesktopOnly": true
 }
