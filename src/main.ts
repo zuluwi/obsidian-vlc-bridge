@@ -195,7 +195,7 @@ export default class VLCBridgePlugin extends Plugin {
             if (snapshot) {
               const currentStats: vlcStatusResponse = response?.json;
 
-              const timestampLink = await this.getTimestampLink(status);
+              const timestampLink = await this.getTimestampLink(status, "snapshot");
               const filename = currentStats.information.category.meta.filename;
 
               const snapshotLinktext = this.settings.snapshotLinktext.replace(/{{filename}}/g, filename).replace(/{{timestamp}}/g, timestampLink.timestamp);
@@ -239,7 +239,7 @@ export default class VLCBridgePlugin extends Plugin {
     return new Date(seconds * 1000).toISOString().slice(seconds < 3600 ? 14 : 11, 19);
   }
 
-  getTimestampLink = (response: RequestUrlResponse) => {
+  getTimestampLink = (response: RequestUrlResponse, type?: "snapshot" | "timestamp") => {
     return new Promise<{ link: string; timestamp: string }>(async (resolve, reject) => {
       const currentStats: vlcStatusResponse = response?.json;
       if (!currentStats) {
@@ -267,7 +267,10 @@ export default class VLCBridgePlugin extends Plugin {
         params.subDelay = currentStats.subtitledelay.toString();
       }
 
-      const currentTimeAsSeconds: number = currentStats.time + this.settings.timestampOffset;
+      let currentTimeAsSeconds: number = currentStats.time;
+      if (type !== "snapshot") {
+        currentTimeAsSeconds = currentTimeAsSeconds + this.settings.timestampOffset;
+      }
       const timestamp = this.secondsToTimestamp(currentTimeAsSeconds);
 
       const filename = currentStats.information.category.meta.filename;
