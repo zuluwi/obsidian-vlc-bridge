@@ -91,7 +91,7 @@ export default class VLCBridgePlugin extends Plugin {
     });
 
     this.addCommand({
-      id: "vlc-go-next-frame",
+      id: "go-next-frame",
       name: t("Next frame"),
       repeatable: true,
       callback: async () => {
@@ -100,7 +100,7 @@ export default class VLCBridgePlugin extends Plugin {
     });
 
     this.addCommand({
-      id: "vlc-go-previous-frame",
+      id: "go-previous-frame",
       name: t("Previous frame"),
       repeatable: true,
       callback: async () => {
@@ -109,7 +109,7 @@ export default class VLCBridgePlugin extends Plugin {
     });
 
     this.addCommand({
-      id: "vlc-normal-seek-forward",
+      id: "normal-seek-forward",
       name: t("Seek forward"),
       repeatable: true,
       callback: async () => {
@@ -118,7 +118,7 @@ export default class VLCBridgePlugin extends Plugin {
     });
 
     this.addCommand({
-      id: "vlc-normal-seek-backward",
+      id: "normal-seek-backward",
       name: t("Seek backward"),
       repeatable: true,
       callback: async () => {
@@ -126,7 +126,7 @@ export default class VLCBridgePlugin extends Plugin {
       },
     });
     this.addCommand({
-      id: "vlc-large-seek-forward",
+      id: "large-seek-forward",
       name: t("Long seek forward"),
       repeatable: true,
       callback: async () => {
@@ -135,7 +135,7 @@ export default class VLCBridgePlugin extends Plugin {
     });
 
     this.addCommand({
-      id: "vlc-large-seek-backward",
+      id: "large-seek-backward",
       name: t("Long seek backward"),
       repeatable: true,
       callback: async () => {
@@ -144,7 +144,7 @@ export default class VLCBridgePlugin extends Plugin {
     });
 
     this.addCommand({
-      id: "vlc-toggle-fullscreen",
+      id: "toggle-fullscreen",
       name: t("Toggle fullscreen"),
       callback: async () => {
         this.sendVlcRequest(`fullscreen`);
@@ -152,7 +152,7 @@ export default class VLCBridgePlugin extends Plugin {
     });
 
     this.addCommand({
-      id: "vlc-toggle-play",
+      id: "toggle-play",
       name: t("Toggle play/pause"),
       callback: async () => {
         this.sendVlcRequest(`pl_pause`);
@@ -160,7 +160,7 @@ export default class VLCBridgePlugin extends Plugin {
     });
 
     this.addCommand({
-      id: "vlc-paste-snapshot",
+      id: "paste-snapshot",
       name: t("Take and paste snapshot from video"),
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         if (currentConfig.snapshotFolder && !(await this.app.vault.adapter.exists(currentConfig.snapshotFolder))) {
