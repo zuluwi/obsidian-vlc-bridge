@@ -60,12 +60,14 @@ Open the command palette (Ctrl+P) and use the command `Paste timestamped link of
 Link Syntax:
 
 ```
-[<timestamp>](obsidian://vlcBridge?mediaPath=<File URI>&subPath=<File URI or Absolute Path>&subDelay=<in seconds>&timestamp=<in seconds or percentage value>)
+[{{Timestamp Linktext}}](obsidian://vlcBridge?mediaPath=<File URI>&subPath=<File URI or Absolute Path>&subDelay=<in seconds>&timestamp=<in seconds or percentage value>)
 ```
 
 > [!tip]
 >
 > - Check `Pause video while pasting timestamp` in Settings
+> - You can add delay with `Timestamp Offset` setting
+> - In the `Link Templates` settings you can set `Timestamp Linktext` and a template for how to paste the link
 
 #### Include Subtitle Link
 
@@ -79,6 +81,7 @@ Open the command palette (Ctrl+P) and use the `Take and paste snapshot from vide
 >
 > - Check `Pause video while pasting snapshot` in Settings
 > - If you want to open the exact frame in the snapshot with the timestamp link, enable `Use percentile position instead of seconds as timestamp value in the link` in Settings
+> - In the `Link Templates` settings you can set `Snapshot Linktext` and a template for how to paste the snapshot embed
 
 ### Running Syncplay with plugin arguments
 
