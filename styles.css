@@ -1,0 +1,12 @@
+.vlc-bridge-text-input {
+  border-color: currentColor;
+}
+.vlc-bridge-text-input.warning {
+  border-color: red !important;
+}
+.vlc-bridge-text-input.number {
+  width: 5em !important;
+}
+.vlc-bridge-text-input.linktext {
+  width: 20em !important;
+}

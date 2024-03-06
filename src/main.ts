@@ -23,7 +23,6 @@ export default class VLCBridgePlugin extends Plugin {
 
   async onload() {
     await this.loadSettings();
-    this.setSidebarIcon();
 
     const { getStatus, getCurrentVideo, checkPort, sendVlcRequest, openVideo, launchSyncplay, vlcExecOptions, addSubtitle } = passPlugin(this);
     this.openVideo = openVideo;
@@ -224,16 +223,6 @@ export default class VLCBridgePlugin extends Plugin {
   }
 
   onunload() {}
-
-  setSidebarIcon = () => {
-    if (this.settings.showSidebarIcon) {
-      this.openVideoIcon = this.addRibbonIcon("lucide-traffic-cone", t("Select a file to open with VLC Player"), (evt: MouseEvent) => {
-        this.fileOpen();
-      });
-    } else {
-      this.openVideoIcon?.remove();
-    }
-  };
 
   secondsToTimestamp(seconds: number) {
     return new Date(seconds * 1000).toISOString().slice(seconds < 3600 ? 14 : 11, 19);
