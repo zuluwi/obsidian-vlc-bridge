@@ -65,10 +65,10 @@ export default {
     "Bu komutu kullanabilmek için öncelikle plugin ayarlarından 'Syncplay.exe'yi seçmeniz gerekmekte",
   //
   Snapshot: "Snapshot",
-  "Snapshot folder": "Snapshot Klasörü",
+  "Snapshot folder": "Snapshot klasörü",
   "Enter the folder name where snapshots will be saved in the vault": "Snapshotların kasada kaydedileceği klasör adını giriniz",
   "Select a valid file name": `Geçerli bir dosya adı seçiniz ( isim \\ / < > " * : | ? karakterlerini barındırmamalı )`,
-  "Snapshot Format": "Snapshot Formatı",
+  "Snapshot format": "Snapshot formatı",
   "Select the image format in which the snapshots will be saved": "Snapshotların kaydedileceği görsel formatını seçiniz",
   //
   Extra: "Ekstra",

@@ -60,7 +60,7 @@ export default {
   "Snapshot folder": "Snapshot folder",
   "Enter the folder name where snapshots will be saved in the vault": "Enter the folder name where snapshots will be saved in the vault",
   "Select a valid file name": `Select a valid file name ( name must not contain the characters \\ / < > " * : | ?  )`,
-  "Snapshot Format": "Snapshot Format",
+  "Snapshot format": "Snapshot format",
   "Select the image format in which the snapshots will be saved": "Select the image format in which the snapshots will be saved",
   //
   "Syncplay path": "Syncplay path",
