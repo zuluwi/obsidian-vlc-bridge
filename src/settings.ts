@@ -4,11 +4,6 @@ import { t } from "./language/helpers";
 import { currentConfig } from "./vlcHelper";
 import isPortReachable from "is-port-reachable";
 
-declare module "obsidian" {
-  interface DataAdapter {
-    getFullRealPath(arg: string): string;
-  }
-}
 export interface VBPluginSettings {
   port: number;
   password: string;
@@ -117,7 +112,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         createFragment((el) => {
           MarkdownRenderer.render(
             this.app,
-            `## \\!\\[[ {{${t("Snapshot Path")}}} | **${this.plugin.settings.snapshotLinktext}** ]] \n#### ${t("Placeholders")} \n- \`{{filename}}\` \n- \`{{timestamp}}\` \n`,
+            `## \\!\\[[ {{${t("Snapshot path")}}} | **${this.plugin.settings.snapshotLinktext}** ]] \n#### ${t("Placeholders")} \n- \`{{filename}}\` \n- \`{{timestamp}}\` \n`,
             el.createDiv(),
             "",
             this.plugin
@@ -128,7 +123,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     let selectVLCDescEl: HTMLElement;
     const selectVLC = new Setting(containerEl)
-      .setName(t("VLC Path"))
+      .setName(t("VLC path"))
       .setDesc(t("Select 'vlc.exe' from the folder where VLC Player is installed"))
       .addButton((btn) => {
         btn.setButtonText(t("Select vlc.exe")).onClick(() => {
@@ -218,7 +213,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       let tsOffsetSlider: SliderComponent;
       let tsOffsetText: TextComponent;
       new Setting(containerEl)
-        .setName(t("Timestamp Offset"))
+        .setName(t("Timestamp offset (in seconds)"))
         .addSlider((slider) => {
           tsOffsetSlider = slider;
           slider
@@ -235,26 +230,21 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         .addText((text) => {
           tsOffsetText = text;
           text.setValue(this.plugin.settings.timestampOffset.toString()).onChange(async (value) => {
-            if (!Number.isInteger(Number(value))) {
-              text.inputEl.addClass("warning");
-            } else {
-              text.inputEl.removeClass("warning");
-              this.plugin.settings.timestampOffset = Number(value);
-              await this.plugin.saveSettings();
-              tsOffsetSlider.setValue(this.plugin.settings.timestampOffset);
-            }
+            this.plugin.settings.timestampOffset = Number(value);
+            await this.plugin.saveSettings();
+            tsOffsetSlider.setValue(this.plugin.settings.timestampOffset);
           });
-
+          text.inputEl.type = "number";
           text.inputEl.addClasses(["vlc-bridge-text-input", "number"]);
         });
     }
 
-    new Setting(containerEl).setName(t("Link Templates")).setHeading();
+    new Setting(containerEl).setName(t("Link templates")).setHeading();
 
-    new Setting(containerEl).setName(t("Timestamp Link")).setHeading();
+    new Setting(containerEl).setName(t("Timestamp link")).setHeading();
 
     const tsLinkTextSetting = new Setting(containerEl)
-      .setName(t("Timestamp Linktext"))
+      .setName(t("Timestamp linktext"))
       .addText((text) => {
         text
           .setPlaceholder(this.plugin.settings.timestampLinktext)
@@ -276,7 +266,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName(t("Timestamp Template"))
+      .setName(t("Timestamp template"))
       .setDesc(
         createFragment((el) => {
           MarkdownRenderer.render(this.app, `#### ${t("Placeholders")} \n- \`{{timestamplink}}\` \n- \`{{filename}}\` \n- \`{{timestamp}}\`\n`, el.createDiv(), "", this.plugin);
@@ -304,10 +294,10 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         })
       );
 
-    containerEl.createEl("h2", { text: t("Snapshot Embed") });
+    containerEl.createEl("h2", { text: t("Snapshot embed") });
 
     const ssLinkTextSetting = new Setting(containerEl)
-      .setName(t("Snapshot Linktext"))
+      .setName(t("Snapshot linktext"))
       .addText((text) => {
         text
           .setPlaceholder(this.plugin.settings.snapshotLinktext)
@@ -327,7 +317,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         })
       );
     new Setting(containerEl)
-      .setName(t("Snapshot Template"))
+      .setName(t("Snapshot template"))
       .setDesc(
         createFragment((el) => {
           MarkdownRenderer.render(
@@ -361,12 +351,12 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         })
       );
 
-    new Setting(containerEl).setName(t("Seeking Amounts")).setHeading();
+    new Setting(containerEl).setName(t("Seeking amounts")).setHeading();
 
     let seekOffsetSlider: SliderComponent;
     let seekOffsetText: TextComponent;
     new Setting(containerEl)
-      .setName(t("Normal Seek Amount (in seconds)"))
+      .setName(t("Normal seek amount (in seconds)"))
       .setDesc(t("Set the seek amount for 'Seek forward/backward' commands"))
       .addSlider((slider) => {
         seekOffsetSlider = slider;
@@ -383,28 +373,23 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       .addText((text) => {
         seekOffsetText = text;
         text.setValue(this.plugin.settings.normalSeek.toString()).onChange(async (value) => {
-          if (!Number.isInteger(Number(value))) {
-            text.inputEl.addClass("warning");
-          } else {
-            text.inputEl.removeClass("warning");
-            this.plugin.settings.normalSeek = Number(value);
-            await this.plugin.saveSettings();
-            seekOffsetSlider.setValue(this.plugin.settings.normalSeek);
-          }
+          this.plugin.settings.normalSeek = Number(value);
+          await this.plugin.saveSettings();
+          seekOffsetSlider.setValue(this.plugin.settings.normalSeek);
         });
-
+        text.inputEl.type = "number";
         text.inputEl.addClasses(["vlc-bridge-text-input", "number"]);
       });
 
     let longSeekOffsetSlider: SliderComponent;
     let longSeekOffsetText: TextComponent;
     new Setting(containerEl)
-      .setName(t("Long Seek Amount (in seconds)"))
+      .setName(t("Long seek amount (in seconds)"))
       .setDesc(t("Set the seek amount for 'Long seek forward/backward' commands"))
       .addSlider((slider) => {
         longSeekOffsetSlider = slider;
         slider
-          .setLimits(5, 10 * 60, 5)
+          .setLimits(0, 10 * 60, 5)
           .setDynamicTooltip()
           .setValue(this.plugin.settings.largeSeek)
           .onChange(async (value) => {
@@ -416,16 +401,12 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       .addText((text) => {
         longSeekOffsetText = text;
         text.setValue(this.plugin.settings.largeSeek.toString()).onChange(async (value) => {
-          if (!Number.isInteger(Number(value))) {
-            text.inputEl.addClass("warning");
-          } else {
-            text.inputEl.removeClass("warning");
-            this.plugin.settings.largeSeek = Number(value);
-            await this.plugin.saveSettings();
-            longSeekOffsetSlider.setValue(this.plugin.settings.largeSeek);
-          }
+          this.plugin.settings.largeSeek = Number(value);
+          await this.plugin.saveSettings();
+          longSeekOffsetSlider.setValue(this.plugin.settings.largeSeek);
         });
-
+        text.inputEl.type = "number";
+        text.inputEl.step = "5";
         text.inputEl.addClasses(["vlc-bridge-text-input", "number"]);
       });
 
@@ -477,7 +458,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     let selectSPDescEl: HTMLElement;
     const selectSP = new Setting(containerEl)
-      .setName(t("Syncplay Path"))
+      .setName(t("Syncplay path"))
       .setDesc(t("Select 'Syncplay.exe' from the folder where Syncplay is installed"))
       .addButton((btn) => {
         btn

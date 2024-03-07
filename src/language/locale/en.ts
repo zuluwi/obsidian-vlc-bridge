@@ -24,7 +24,7 @@ export default {
     "Snapshot not found, if you made a change to the snapshot folder name, try restarting VLC.",
 
   /* settings */
-  "VLC Path": "VLC Path",
+  "VLC path": "VLC path",
   "Select 'vlc.exe' from the folder where VLC Player is installed": "Select 'vlc.exe' from the folder where VLC Player is installed",
   "Select vlc.exe": "Select vlc.exe",
   Port: "Port",
@@ -38,22 +38,22 @@ export default {
   "Allows you to open more precise (sub-second) time values. It is recommended to enable this option if you want to open exactly the same frame as when you get the link.":
     "Allows you to open more precise (sub-second) time values. It is recommended to enable this option if you want to open exactly the same frame as when you get the link.",
   "Show 'open video' icon in the sidebar": "Show 'open video' icon in the sidebar",
-  "Timestamp Offset": "Timestamp Offset",
+  "Timestamp offset (in seconds)": "Timestamp offset (in seconds)",
   //
-  "Link Templates": "Link Templates",
-  "Timestamp Link": "Timestamp Link",
-  "Timestamp Linktext": "Timestamp Linktext",
-  "Timestamp Template": "Timestamp Template",
-  "Snapshot Embed": "Snapshot Embed",
-  "Snapshot Path": "Snapshot Path",
-  "Snapshot Linktext": "Snapshot Linktext",
-  "Snapshot Template": "Snapshot Template",
+  "Link templates": "Link templates",
+  "Timestamp link": "Timestamp link",
+  "Timestamp linktext": "Timestamp linktext",
+  "Timestamp template": "Timestamp template",
+  "Snapshot embed": "Snapshot embed",
+  "Snapshot path": "Snapshot path",
+  "Snapshot linktext": "Snapshot linktext",
+  "Snapshot template": "Snapshot template",
   Placeholders: "Placeholders",
   //
-  "Seeking Amounts": "Seeking Amounts",
-  "Normal Seek Amount (in seconds)": "Normal Seek Amount (in seconds)",
+  "Seeking amounts": "Seeking amounts",
+  "Normal seek amount (in seconds)": "Normal seek amount (in seconds)",
   "Set the seek amount for 'Seek forward/backward' commands": "Set the seek amount for 'Seek forward/backward' commands",
-  "Long Seek Amount (in seconds)": "Long Seek Amount (in seconds)",
+  "Long seek amount (in seconds)": "Long seek amount (in seconds)",
   "Set the seek amount for 'Long seek forward/backward' commands": "Set the seek amount for 'Long seek forward/backward' commands",
   //
   Snapshot: "Snapshot",
@@ -63,7 +63,7 @@ export default {
   "Snapshot Format": "Snapshot Format",
   "Select the image format in which the snapshots will be saved": "Select the image format in which the snapshots will be saved",
   //
-  "Syncplay Path": "Syncplay Path",
+  "Syncplay path": "Syncplay path",
   "Select 'Syncplay.exe' from the folder where Syncplay is installed": "Select 'Syncplay.exe' from the folder where Syncplay is installed",
   "Select Syncplay.exe": "Select Syncplay.exe",
   "Start Syncplay with plugin arguments": "Start Syncplay with plugin arguments",

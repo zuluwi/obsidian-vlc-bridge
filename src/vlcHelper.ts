@@ -8,6 +8,11 @@ import { t } from "./language/helpers";
 import { fileURLToPath } from "url";
 import isPortReachable from "is-port-reachable";
 
+declare module "obsidian" {
+  interface DataAdapter {
+    getFullRealPath(arg: string): string;
+  }
+}
 interface config {
   port: number | null;
   password: string | null;
