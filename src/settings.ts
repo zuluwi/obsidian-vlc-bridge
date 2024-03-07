@@ -441,7 +441,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName(t("Snapshot Format"))
+      .setName(t("Snapshot format"))
       .setDesc(t("Select the image format in which the snapshots will be saved"))
       .addDropdown((menu) => {
         menu
