@@ -56,7 +56,7 @@ export default {
   "Long seek amount (in seconds)": "Uzun ileri/geri sarma Miktarı (saniye cinsinden)",
   "Set the seek amount for 'Long seek forward/backward' commands": "'Uzun ileri/geri sar' komutları için atmala miktarını seçiniz",
   //
-  "Syncplay path": "Syncplay yolu",
+  "Syncplay path": "Syncplay dosya yolu",
   "Select 'Syncplay.exe' from the folder where Syncplay is installed": "Syncplay'in kurulu olduğu klasörden Syncplay.exe'yi seçiniz",
   "Select Syncplay.exe": "Syncplay.exe'yi seç",
   "Start Syncplay with plugin arguments": "Plugin argümanlarıyla Syncplay'i çalıştır",

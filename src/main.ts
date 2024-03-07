@@ -11,7 +11,6 @@ declare global {
 
 export default class VLCBridgePlugin extends Plugin {
   settings: VBPluginSettings;
-  openVideoIcon: HTMLElement;
   openVideo: (params: ObsidianProtocolData | { mediaPath: string; subPath?: string; subDelay?: string; timestamp?: string }) => void;
   addSubtitle: (filePath: string, subDelay?: string) => void;
   sendVlcRequest: (command: string) => Promise<RequestUrlResponse | undefined>;
@@ -40,6 +39,10 @@ export default class VLCBridgePlugin extends Plugin {
 
     this.registerObsidianProtocolHandler("vlcBridge-runSyncplay", () => {
       this.launchSyncplay();
+    });
+
+    this.addRibbonIcon("lucide-traffic-cone", t("Select a file to open with VLC Player"), (evt: MouseEvent) => {
+      this.fileOpen();
     });
 
     this.addCommand({
