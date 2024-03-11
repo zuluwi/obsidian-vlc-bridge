@@ -6,7 +6,7 @@
 <img alt="GitHub Release" src="https://img.shields.io/github/v/release/zuluwi/obsidian-vlc-bridge?style=for-the-badge&logo=obsidian&labelColor=%238b9d32&color=%23e7e6e3">
 </a>
 
-<img alt="Downloads" src="https://img.shields.io/github/downloads/zuluwi/obsidian-vlc-bridge/total?style=for-the-badge&logo=obsidian&labelColor=%237c3aed&color=%23e7e6e3">
+<img alt="Downloads" src="https://img.shields.io/github/downloads/zuluwi/obsidian-vlc-bridge/main.js?style=for-the-badge&logo=obsidian&labelColor=%237c3aed&color=%23e7e6e3">
 
 <a href="https://github.com/zuluwi/obsidian-vlc-bridge/blob/master/LICENSE">
 <img alt="GitHub License" src="https://img.shields.io/github/license/zuluwi/obsidian-vlc-bridge?style=for-the-badge&labelColor=%23eb0029&color=%23e7e6e3">
