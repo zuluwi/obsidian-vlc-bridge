@@ -3,10 +3,11 @@
 	
 
 <a href="https://github.com/zuluwi/obsidian-vlc-bridge/releases/latest">
-<img alt="GitHub Release" src="https://img.shields.io/github/v/release/zuluwi/obsidian-vlc-bridge?style=for-the-badge&logo=obsidian&labelColor=%238b9d32&color=%23e7e6e3">
+<img alt="GitHub Release" src="https://img.shields.io/github/v/release/zuluwi/obsidian-vlc-bridge?style=for-the-badge&labelColor=%238b9d32&color=%23e7e6e3">
 </a>
 
-<img alt="Downloads" src="https://img.shields.io/github/downloads/zuluwi/obsidian-vlc-bridge/main.js?style=for-the-badge&logo=obsidian&labelColor=%237c3aed&color=%23e7e6e3">
+<!-- Reference: https://github.com/marcusolsson/obsidian-projects/blob/2fd39889e40c5854cd7d49eee3d7aeadb1dbfe3a/README.md?plain=1#L9 -->
+<img alt="Downloads" src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&logo=obsidian&label=downloads&labelColor=%237c3aed&color=%23e7e6e3&query=%24[%22vlc-bridge%22].downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json">
 
 <a href="https://github.com/zuluwi/obsidian-vlc-bridge/blob/master/LICENSE">
 <img alt="GitHub License" src="https://img.shields.io/github/license/zuluwi/obsidian-vlc-bridge?style=for-the-badge&labelColor=%23eb0029&color=%23e7e6e3">
