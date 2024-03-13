@@ -6,6 +6,7 @@ export default {
   "No video information available": "Mevcut video bilgisine ulaşılamadı",
   //
   "Select a file to open with VLC Player": "VLC Player ile açmak için bir dosya seçin",
+  "Open with VLC Player": "VLC Player ile aç",
   "Add subtitles": "Altyazı ekle",
   "A video must be open to add subtitles": "Altyazı ekleyebilmek için bir video açık olmalı",
   "Next frame": "Sonraki kare",

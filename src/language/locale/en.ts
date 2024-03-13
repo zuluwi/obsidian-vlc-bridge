@@ -6,6 +6,7 @@ export default {
   "No video information available": "No video information available",
   //
   "Select a file to open with VLC Player": "Select a file to open with VLC Player",
+  "Open with VLC Player": "Open with VLC Player",
   "Add subtitles": "Add subtitles",
   "A video must be open to add subtitles": "A video must be open to add subtitles",
   "Next frame": "Next frame",

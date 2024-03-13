@@ -1,7 +1,8 @@
-import { Editor, MarkdownView, Notice, ObsidianProtocolData, Plugin, RequestUrlResponse } from "obsidian";
+import { Editor, MarkdownView, Notice, ObsidianProtocolData, Plugin, RequestUrlResponse, TFile } from "obsidian";
 import { DEFAULT_SETTINGS, VBPluginSettingsTab, VBPluginSettings } from "./settings";
 import { passPlugin, currentConfig, currentMedia, vlcStatusResponse } from "./vlcHelper";
 import { t } from "./language/helpers";
+import extensionList from "./extensionList";
 
 declare global {
   interface File {
@@ -44,6 +45,26 @@ export default class VLCBridgePlugin extends Plugin {
     this.addRibbonIcon("lucide-traffic-cone", t("Select a file to open with VLC Player"), (evt: MouseEvent) => {
       this.fileOpen();
     });
+
+    this.registerEvent(
+      this.app.workspace.on("file-menu", (menu, file, source, leaf) => {
+        if (!(file instanceof TFile) || !this.settings.vlcPath) return;
+        const mediaExts = [...extensionList.video, ...extensionList.audio];
+        if (mediaExts.includes(file.extension)) {
+          menu
+            .addItem((item) => {
+              item
+                .setIcon("lucide-traffic-cone")
+                .setTitle(t("Open with VLC Player"))
+                .onClick(() => {
+                  const filePath = this.app.vault.adapter.getFullRealPath(file.path);
+                  this.openVideo({ mediaPath: filePath });
+                });
+            })
+            .addSeparator();
+        }
+      })
+    );
 
     this.addCommand({
       id: "paste-video-path-with-timestamp",
@@ -286,7 +307,8 @@ export default class VLCBridgePlugin extends Plugin {
     }
     const input = document.createElement("input");
     input.setAttribute("type", "file");
-    input.accept = "video/*, audio/*, .mpd, .flv, .mkv";
+    const supportedMediaFormats = [...extensionList.audio, ...extensionList.video].map((e) => "." + e).join(",");
+    input.accept = `video/*, audio/*, ${supportedMediaFormats}`;
     input.onchange = (e: Event) => {
       const files = (e.target as HTMLInputElement)?.files as FileList;
       for (let i = 0; i < files.length; i++) {
@@ -312,33 +334,8 @@ export default class VLCBridgePlugin extends Plugin {
     }
     const input = document.createElement("input");
     input.setAttribute("type", "file");
-    // https://wiki.videolan.org/subtitles#Subtitles_support_in_VLC
-    const supportedSubtitleFormats = [
-      ".aqt",
-      ".usf",
-      ".txt",
-      ".svcd",
-      ".sub",
-      ".idx",
-      ".sub",
-      ".sub",
-      ".sub",
-      ".ssa",
-      ".ass",
-      ".srt",
-      ".smi",
-      ".rt",
-      ".pjs",
-      ".mpl",
-      ".jss",
-      ".dks",
-      ".cvd",
-      ".aqt",
-      ".ttxt",
-      ".ssf",
-      ".psb",
-    ];
-    input.accept = supportedSubtitleFormats.join(",");
+    const supportedSubtitleFormats = extensionList.subtitle;
+    input.accept = supportedSubtitleFormats.map((e) => "." + e).join(",");
     input.onchange = (e: Event) => {
       const files = (e.target as HTMLInputElement)?.files as FileList;
       for (let i = 0; i < files.length; i++) {
