@@ -1,9 +1,17 @@
 <div align="center">
+<h1>Obsidian VLC Bridge</h1>	
 	
-# Obsidian VLC Bridge
-	
-[![GitHub Release](https://img.shields.io/github/v/release/zuluwi/obsidian-vlc-bridge?style=for-the-badge&logo=obsidian&labelColor=%237c3aed&color=%23e7e6e3)](https://github.com/zuluwi/obsidian-vlc-bridge/releases/latest)
-[![GitHub License](https://img.shields.io/github/license/zuluwi/obsidian-vlc-bridge?style=for-the-badge&labelColor=%23eb0029&color=%23e7e6e3)](https://github.com/zuluwi/obsidian-vlc-bridge/blob/master/LICENSE)
+
+<a href="https://github.com/zuluwi/obsidian-vlc-bridge/releases/latest">
+<img alt="GitHub Release" src="https://img.shields.io/github/v/release/zuluwi/obsidian-vlc-bridge?style=for-the-badge&labelColor=%238b9d32&color=%23e7e6e3">
+</a>
+
+<!-- Reference: https://github.com/marcusolsson/obsidian-projects/blob/2fd39889e40c5854cd7d49eee3d7aeadb1dbfe3a/README.md?plain=1#L9 -->
+<img alt="Downloads" src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&logo=obsidian&label=downloads&labelColor=%237c3aed&color=%23e7e6e3&query=%24[%22vlc-bridge%22].downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json">
+
+<a href="https://github.com/zuluwi/obsidian-vlc-bridge/blob/master/LICENSE">
+<img alt="GitHub License" src="https://img.shields.io/github/license/zuluwi/obsidian-vlc-bridge?style=for-the-badge&labelColor=%23eb0029&color=%23e7e6e3">
+</a>
 
 </div>
 
@@ -19,7 +27,14 @@ https://github.com/zuluwi/obsidian-vlc-bridge/assets/111116092/296c6878-232f-48e
 
 ## Installation
 
-This plugin is not an official community plugin, so you can install it manually or using the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin
+Turn off `Settings → Community plugins → Restricted mode`, click `Settings → Community plugins → Browse` and search for "VLC Bridge" or open [this link](https://obsidian.md/plugins?id=vlc-bridge), then install and enable it.
+
+Or:
+
+### With BRAT
+
+1. Install and activate **[BRAT](https://github.com/TfTHacker/obsidian42-brat)** by opening the `obsidian://show-plugin?id=obsidian42-brat` link or from `Settings → Community plugins → Browse`
+2. Install **VLC Bridge** by using the `Add a beta plugin for testing` command and then entering `zuluwi/obsidian-vlc-bridge` or by opening the link `obsidian://brat?plugin=zuluwi/obsidian-vlc-bridge`
 
 ### Manual
 
@@ -28,10 +43,6 @@ This plugin is not an official community plugin, so you can install it manually 
 3. Move the downloaded `main.js` and `manifest.json` files to this folder
 4. Turn off `Settings → Community plugins → Restricted mode` and enable **VLC Bridge** in `Installed plugins`.
 
-### With BRAT
-
-1. Install and activate **BRAT** by opening the `obsidian://show-plugin?id=obsidian42-brat` link or from `Settings → Community plugins → Browse`
-2. Install **VLC Bridge** by using the `Add a beta plugin for testing` command and then entering `zuluwi/obsidian-vlc-bridge` or by opening the link `obsidian://brat?plugin=zuluwi/obsidian-vlc-bridge`
 
 ## Usage
 
