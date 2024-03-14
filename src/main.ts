@@ -211,18 +211,17 @@ export default class VLCBridgePlugin extends Plugin {
           if (response.status == 200) {
             const afterReq = Date.now();
 
-            const snapshot = this.app.vault
-              .getFiles()
-              .filter((f) => f.path.startsWith(`${currentConfig.snapshotFolder || this.settings.snapshotFolder}/`) && f.stat.mtime > beforeReq && f.stat.mtime < afterReq)
-              ?.first();
+            let snapshot: TFile | undefined;
+            snapshot = await this.findSnapshotFile(beforeReq, afterReq);
             if (snapshot) {
+              const snapshotLinkpath = this.app.metadataCache.fileToLinktext(snapshot, "/");
               const currentStats: vlcStatusResponse = response?.json;
 
               const timestampLink = await this.getTimestampLink(status, "snapshot");
               const filename = currentStats.information.category.meta.filename;
 
               const snapshotLinktext = this.settings.snapshotLinktext.replace(/{{filename}}/g, filename).replace(/{{timestamp}}/g, timestampLink.timestamp);
-              const snapshotEmbed = `![[${snapshot.path} | ${snapshotLinktext}]]`;
+              const snapshotEmbed = `![[${snapshotLinkpath} | ${snapshotLinktext}]]`;
               const templateStr = this.settings.snapshotLinkTemplate
                 .replace(/{{timestamplink}}/g, timestampLink.link)
                 .replace(/{{snapshot}}/g, snapshotEmbed)
@@ -247,6 +246,44 @@ export default class VLCBridgePlugin extends Plugin {
   }
 
   onunload() {}
+
+  findSnapshotFile = (beforeReq: number, afterReq: number) => {
+    return new Promise<TFile | undefined>((res, rej) => {
+      const findSnapshot = () => {
+        return this.app.vault
+          .getFiles()
+          .filter((f) => f.path.startsWith(`${currentConfig.snapshotFolder || this.settings.snapshotFolder}`) && f.stat.ctime > beforeReq && f.stat.ctime < afterReq)
+          ?.first();
+      };
+
+      let snapshot: TFile | undefined;
+      snapshot = findSnapshot();
+
+      if (snapshot) {
+        res(snapshot);
+      } else {
+        let checkSnapshotInterval: NodeJS.Timer | undefined;
+        let checkSnapshotTimeout: NodeJS.Timeout;
+
+        checkSnapshotInterval = setInterval(() => {
+          snapshot = findSnapshot();
+
+          if (snapshot) {
+            checkSnapshotInterval = clearInterval(checkSnapshotInterval) as undefined;
+            clearTimeout(checkSnapshotTimeout);
+            res(snapshot);
+          }
+        }, 100);
+
+        checkSnapshotTimeout = setTimeout(() => {
+          if (checkSnapshotInterval) {
+            checkSnapshotInterval = clearInterval(checkSnapshotInterval) as undefined;
+            res(snapshot);
+          }
+        }, 1000);
+      }
+    });
+  };
 
   secondsToTimestamp(seconds: number) {
     return new Date(seconds * 1000).toISOString().slice(seconds < 3600 ? 14 : 11, 19);
@@ -334,8 +371,8 @@ export default class VLCBridgePlugin extends Plugin {
     }
     const input = document.createElement("input");
     input.setAttribute("type", "file");
-    const supportedSubtitleFormats = extensionList.subtitle;
-    input.accept = supportedSubtitleFormats.map((e) => "." + e).join(",");
+    const supportedSubtitleFormats = extensionList.subtitle.map((e) => "." + e).join(",");
+    input.accept = supportedSubtitleFormats;
     input.onchange = (e: Event) => {
       const files = (e.target as HTMLInputElement)?.files as FileList;
       for (let i = 0; i < files.length; i++) {

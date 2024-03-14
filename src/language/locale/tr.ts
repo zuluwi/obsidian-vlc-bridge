@@ -68,7 +68,7 @@ export default {
   Snapshot: "Snapshot",
   "Snapshot folder": "Snapshot klasörü",
   "Enter the folder name where snapshots will be saved in the vault": "Snapshotların kasada kaydedileceği klasör adını giriniz",
-  "Select a valid file name": `Geçerli bir dosya adı seçiniz ( isim \\ / < > " * : | ? karakterlerini barındırmamalı )`,
+  "Select a valid file name": `Geçerli bir dosya adı seçiniz ( isim \\ < > " * : | ? karakterlerini barındırmamalı )`,
   "Snapshot format": "Snapshot formatı",
   "Select the image format in which the snapshots will be saved": "Snapshotların kaydedileceği görsel formatını seçiniz",
   //

@@ -62,7 +62,7 @@ const snapshotExts: {
 
 export class VBPluginSettingsTab extends PluginSettingTab {
   plugin: VLCBridgePlugin;
-
+  lastSnapshotPath: string;
   constructor(app: App, plugin: VLCBridgePlugin) {
     super(app, plugin);
     this.plugin = plugin;
@@ -412,7 +412,8 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl).setName(t("Snapshot")).setHeading();
 
-    const folderNamePattern = /^[A-Za-z0-9][^\\\/\<\>\"\*\:\|\?]*$/gi;
+    const folderNamePattern = /^[A-Za-z0-9][^\\\<\>\"\*\:\|\?]*$/gi;
+    this.lastSnapshotPath = this.plugin.settings.snapshotFolder;
     new Setting(containerEl)
       .setName(t("Snapshot folder"))
       .setDesc(t("Enter the folder name where snapshots will be saved in the vault"))
@@ -426,11 +427,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
               text.inputEl.addClass("warning");
             } else {
               text.inputEl.removeClass("warning");
-              if (await this.plugin.app.vault.adapter.exists(this.plugin.settings.snapshotFolder)) {
-                this.plugin.app.vault.adapter.rename(this.plugin.settings.snapshotFolder, value);
-              } else {
-                this.plugin.app.vault.adapter.mkdir(value);
-              }
               this.plugin.settings.snapshotFolder = value;
               await this.plugin.saveSettings();
               setSettingDesc();
@@ -517,5 +513,16 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     );
 
     setSettingDesc();
+  }
+  hide() {
+    const updateSnapshotFolder = async () => {
+      if ((await this.plugin.app.vault.adapter.exists(this.lastSnapshotPath)) && !(await this.plugin.app.vault.adapter.exists(this.plugin.settings.snapshotFolder))) {
+        await this.plugin.app.vault.adapter.rename(this.lastSnapshotPath, this.plugin.settings.snapshotFolder);
+      } else {
+        await this.plugin.app.vault.adapter.mkdir(this.plugin.settings.snapshotFolder);
+      }
+      this.lastSnapshotPath = this.plugin.settings.snapshotFolder;
+    };
+    updateSnapshotFolder();
   }
 }
