@@ -23,7 +23,9 @@ This plugin
 
 so you can take notes from the video without losing focus from the Obsidian Editor.
 
-https://github.com/zuluwi/obsidian-vlc-bridge/assets/111116092/296c6878-232f-48ee-82a4-dd5673ddb131
+<p align="center">
+<video src='https://github.com/zuluwi/obsidian-vlc-bridge/assets/111116092/296c6878-232f-48ee-82a4-dd5673ddb131'/>
+</p>
 
 ## Installation
 
