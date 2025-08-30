@@ -1,8 +1,11 @@
-import { Editor, MarkdownView, Notice, ObsidianProtocolData, Plugin, RequestUrlResponse, TFile } from "obsidian";
+import { Editor, MarkdownView, Notice, ObsidianProtocolData, Platform, Plugin, RequestUrlResponse, TFile } from "obsidian";
 import { DEFAULT_SETTINGS, VBPluginSettingsTab, VBPluginSettings } from "./settings";
 import { passPlugin, currentConfig, currentMedia, vlcStatusResponse } from "./vlcHelper";
 import { t } from "./language/helpers";
 import extensionList from "./extensionList";
+import { fileURLToPath } from "url";
+import * as path from "path";
+const commandExistsSync = require("command-exists").sync;
 
 declare global {
   interface File {
@@ -18,8 +21,10 @@ export default class VLCBridgePlugin extends Plugin {
   getStatus: () => Promise<RequestUrlResponse>;
   checkPort: (timeout?: number) => Promise<object | null>;
   getCurrentVideo: () => Promise<string | null>;
-  vlcExecOptions: () => string[];
+  vlcExecOptions: (type: "syncplay" | "vlc") => string[];
   launchSyncplay: () => void;
+  cliExist: null | "vlc";
+  spCliExist: null | "syncplay";
 
   async onload() {
     await this.loadSettings();
@@ -33,6 +38,18 @@ export default class VLCBridgePlugin extends Plugin {
     this.getCurrentVideo = getCurrentVideo;
     this.vlcExecOptions = vlcExecOptions;
     this.launchSyncplay = launchSyncplay;
+
+    // Check command-lines
+    if (commandExistsSync("vlc")) {
+      this.cliExist = "vlc";
+    } else {
+      this.settings.commandPath = "vlcPath";
+    }
+    if (commandExistsSync("syncplay")) {
+      this.spCliExist = "syncplay";
+    } else {
+      this.settings.spCommandPath = "spPath";
+    }
 
     this.registerObsidianProtocolHandler("vlcBridge", (params: ObsidianProtocolData) => {
       this.openVideo(params);
@@ -303,9 +320,9 @@ export default class VLCBridgePlugin extends Plugin {
 
       const params: {
         mediaPath: string;
-        timestamp?: string;
         subPath?: string;
         subDelay?: string;
+        timestamp?: string;
       } = {
         mediaPath: encodeURIComponent(currentFile),
       };
@@ -339,31 +356,64 @@ export default class VLCBridgePlugin extends Plugin {
   };
 
   async fileOpen() {
-    if (!this.settings.vlcPath) {
-      return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
-    }
-    const input = document.createElement("input");
-    input.setAttribute("type", "file");
-    const supportedMediaFormats = [...extensionList.audio, ...extensionList.video].map((e) => "." + e).join(",");
-    input.accept = `video/*, audio/*, ${supportedMediaFormats}`;
-    input.onchange = (e: Event) => {
-      const files = (e.target as HTMLInputElement)?.files as FileList;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-
-        const fileURI = new URL(file.path).href;
-        this.openVideo({ mediaPath: fileURI });
-
-        input.remove();
+    if (!(this.cliExist || this.settings.vlcPath)) {
+      if (Platform.isWin) {
+        return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
+      } else {
+        return new Notice(t("To use the plugin, the ‘vlc’ command must be installed on your system."));
       }
-    };
+    }
 
-    input.click();
+    // const input = document.createElement("input");
+    // input.setAttribute("type", "file");
+    // const supportedMediaFormats = [...extensionList.audio, ...extensionList.video].map((e) => "." + e).join(",");
+    // input.accept = `video/*, audio/*, ${supportedMediaFormats}`;
+    // input.onchange = (e: Event) => {
+    //   const files = (e.target as HTMLInputElement)?.files as FileList;
+    //   for (let i = 0; i < files.length; i++) {
+    //     const file = files[i];
+
+    //     const fileURI = new URL(file.path).href;
+    //     this.openVideo({ mediaPath: fileURI });
+
+    //     input.remove();
+    //   }
+    // };
+
+    // input.click();
+
+    window.electron.remote.dialog
+      .showOpenDialog({
+        title: t("Select a file to open with VLC Player"),
+        properties: ["openFile"],
+        filters: [
+          {
+            name: "Media",
+            extensions: [...extensionList.audio, ...extensionList.video],
+          },
+        ],
+      })
+      .then(async (result: { canceled: boolean; filePaths: string[] }) => {
+        if (!result.canceled && result.filePaths.length) {
+          const file = result.filePaths[0];
+          const fileURI = new URL(file).href;
+          console.log(result, fileURI);
+
+          this.openVideo({ mediaPath: fileURI });
+        }
+      })
+      .catch((err: Error) => {
+        console.log(err);
+      });
   }
 
   async subtitleOpen() {
-    if (!this.settings.vlcPath) {
-      return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
+    if (!(this.settings.vlcPath || this.cliExist)) {
+      if (Platform.isWin) {
+        return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
+      } else {
+        return new Notice(t("To use the plugin, the ‘vlc’ command must be installed on your system."));
+      }
     }
     const currentVideo = await this.getCurrentVideo();
     if (!currentVideo) {
@@ -384,7 +434,34 @@ export default class VLCBridgePlugin extends Plugin {
       }
     };
 
-    input.click();
+    // input.click();
+    console.log(currentVideo);
+
+    window.electron.remote.dialog
+      .showOpenDialog({
+        title: t("Add subtitles"),
+        properties: ["openFile"],
+        defaultPath: path.dirname(fileURLToPath(currentVideo)),
+        filters: [
+          {
+            name: "Subtitle",
+            extensions: extensionList.subtitle,
+          },
+        ],
+      })
+      .then(async (result: { canceled: boolean; filePaths: string[] }) => {
+        if (!result.canceled && result.filePaths.length) {
+          const file = result.filePaths[0];
+          // const fileURI = new URL(file).href;
+          // console.log(file, fileURI);
+
+          // this.openVideo({ mediaPath: fileURI });
+          this.addSubtitle(file);
+        }
+      })
+      .catch((err: Error) => {
+        console.log(err);
+      });
   }
 
   async seekFrame(prefix: "-" | "+") {

@@ -2,7 +2,7 @@ import * as util from "util";
 import * as childProcess from "child_process";
 const exec = util.promisify(childProcess.exec);
 
-import { Notice, ObsidianProtocolData, RequestUrlResponse, requestUrl } from "obsidian";
+import { Notice, ObsidianProtocolData, Platform, RequestUrlResponse, requestUrl } from "obsidian";
 import VLCBridgePlugin from "./main";
 import { t } from "./language/helpers";
 import { fileURLToPath } from "url";
@@ -231,8 +231,12 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     }
     let plInfo = await checkPort();
     if (!plInfo) {
-      if (!plugin.settings.vlcPath) {
-        return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
+      if (!(plugin.settings.vlcPath || plugin.cliExist)) {
+        if (Platform.isWin) {
+          return new Notice(t("Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings"));
+        } else {
+          return new Notice(t("To use the plugin, the ‘vlc’ command must be installed on your system."));
+        }
       }
       launchVLC();
       plInfo = await checkPort(5000);
@@ -244,7 +248,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
       if (fileCheck) {
         if (fileCheck.current) {
           if (subPath && subPath !== currentMedia.subtitlePath) {
-            addSubtitle(subPath, subDelay);
+            await addSubtitle(subPath, subDelay);
           }
           if (timestamp) {
             requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${timestamp}`);
@@ -253,7 +257,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
           await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=pl_play&id=${fileCheck.id}`).then(async (response) => {
             if (response.status == 200 && (await waitStreams())) {
               if (subPath) {
-                addSubtitle(subPath, subDelay);
+                await addSubtitle(subPath, subDelay);
               }
               if (timestamp) {
                 requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${timestamp}`);
@@ -265,7 +269,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
         await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=in_play&input=${encodeURIComponent(mediaPath)}`).then(async (response) => {
           if (response.status == 200 && (await waitStreams())) {
             if (subPath) {
-              addSubtitle(subPath, subDelay);
+              await addSubtitle(subPath, subDelay);
             }
             if (timestamp) {
               requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${timestamp}`);
@@ -313,21 +317,33 @@ export function passPlugin(plugin: VLCBridgePlugin) {
       filePath = fileURLToPath(filePath);
     }
 
-    requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=addsubtitle&val=${encodeURIComponent(filePath)}`).then(async (response) => {
-      if (response.status == 200) {
-        currentMedia.mediaPath = await getCurrentVideo();
-        currentMedia.subtitlePath = filePath;
-        const subIndex = (await waitStreams()).filter((e) => e !== "meta").length - 1;
-        requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=subtitle_track&val=${subIndex}`);
-        if (typeof subDelay == "number") {
-          requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=subdelay&val=${subDelay}`);
-        }
+    const response = await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=addsubtitle&val=${encodeURIComponent(filePath)}`);
+    // .then(async (response) => {
+    if (response?.status == 200) {
+      currentMedia.mediaPath = await getCurrentVideo();
+      currentMedia.subtitlePath = filePath;
+      const subIndex = (await waitStreams()).filter((e) => e !== "meta").length - 1;
+      await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=subtitle_track&val=${subIndex}`);
+      if (typeof subDelay == "number") {
+        await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=subdelay&val=${subDelay}`);
       }
-    });
+    }
+    // });
   };
 
   // Reference: https://wiki.videolan.org/VLC_command-line_help/
-  const vlcExecOptions = () => [
+  const vlcExecOptions = (type: "syncplay" | "vlc") => [
+    `${
+      type == "syncplay"
+        ? `${
+            plugin.settings.spCommandPath == "spPath" && plugin.settings.syncplayPath
+              ? `"${plugin.settings.syncplayPath}"`
+              : plugin.spCliExist || `"${plugin.settings.syncplayPath}"`
+          } --player-path`
+        : ""
+    }`,
+    `${plugin.settings.commandPath == "vlcPath" && plugin.settings.vlcPath ? `"${plugin.settings.vlcPath}"` : plugin.cliExist || `"${plugin.settings.vlcPath}"`}`,
+    `${type == "syncplay" ? "--" : ""}`,
     `--extraintf=luaintf:http`,
     `--http-port=${plugin.settings.port}`,
     `--http-password=${plugin.settings.password}`,
@@ -342,7 +358,7 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     if (await isPortReachable(plugin.settings.port, { host: "localhost" })) {
       return new Notice(t("The port you selected is not usable, please enter another port value"));
     }
-    exec(`"${plugin.settings.vlcPath}" ${vlcExecOptions().join(" ")}`)
+    exec(vlcExecOptions("vlc").join(" "))
       .finally(() => {
         if (checkInterval) {
           checkInterval = clearInterval(checkInterval) as undefined;
@@ -355,9 +371,9 @@ export function passPlugin(plugin: VLCBridgePlugin) {
           checkTimeout = clearTimeout(checkTimeout) as undefined;
         }
         console.log("VLC Launch Error", err);
-        new Notice(t("The vlc.exe specified in the settings could not be run, please check again!"));
+        // new Notice(t("The vlc.exe specified in the settings could not be run, please check again!"));
       });
-    currentConfig.vlcPath = plugin.settings.vlcPath;
+    // currentConfig.vlcPath = plugin.settings.vlcPath;
     currentConfig.port = plugin.settings.port;
     currentConfig.password = plugin.settings.password;
     currentConfig.snapshotFolder = plugin.settings.snapshotFolder;
@@ -365,21 +381,25 @@ export function passPlugin(plugin: VLCBridgePlugin) {
   };
 
   const launchSyncplay = async () => {
-    if (!plugin.settings.syncplayPath) {
-      return new Notice(t("Before you can use this command, you need to select 'Syncplay.exe' in the plugin settings"));
+    if (!(plugin.settings.syncplayPath || plugin.spCliExist)) {
+      if (Platform.isWin) {
+        return new Notice(t("Before you can use this command, you need to select 'Syncplay.exe' in the plugin settings"));
+      } else {
+        return new Notice(t("To use the command, the ‘syncplay’ command must be installed on your system."));
+      }
     }
     if (await isPortReachable(plugin.settings.port, { host: "localhost" })) {
       return new Notice(t("The port you selected is not usable, please enter another port value"));
     }
 
     // Reference: https://syncplay.pl/guide/client/
-    exec(`"${plugin.settings.syncplayPath}" --player-path "${plugin.settings.vlcPath}" -- ${vlcExecOptions().join(" ")}`)
+    exec(vlcExecOptions("syncplay").join(" "))
       .finally(() => {})
       .catch((err: Error) => {
         console.log("Syncplay Launch Error", err);
         new Notice(t("The vlc.exe specified in the settings could not be run, please check again!"));
       });
-    currentConfig.vlcPath = plugin.settings.vlcPath;
+    // currentConfig.vlcPath = plugin.settings.vlcPath;
     currentConfig.port = plugin.settings.port;
     currentConfig.password = plugin.settings.password;
     currentConfig.snapshotFolder = plugin.settings.snapshotFolder;

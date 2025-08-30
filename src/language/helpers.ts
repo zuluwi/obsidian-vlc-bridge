@@ -66,10 +66,14 @@ const localeMap: { [k: string]: Partial<typeof en> } = {
 };
 const locale = localeMap[moment.locale()];
 
-export function t(str: keyof typeof en): string {
+export function t(str: keyof typeof en, replacements?: string[]): string {
   if (!locale) {
     console.error("Language couldn't fount:", moment.locale());
   }
+  let text = (locale && locale[str]) || en[str] || str;
 
-  return (locale && locale[str]) || en[str] || str;
+  replacements?.map((str, i) => {
+    text = text.replace("{{" + (i + 1).toString() + "}}", str);
+  });
+  return text;
 }

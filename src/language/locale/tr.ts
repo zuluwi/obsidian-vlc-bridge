@@ -25,6 +25,10 @@ export default {
     "Snapshot bulunamadı, eğer snapshot klasörü adında bir değişiklik yaptıysanız VLC'yi yeniden başlatmayı deneyiniz.",
 
   /* settings */
+  "CLI command is available.": "{{1}} CLI komutu kullanılabilir durumda.",
+  "CLI command is not installed on your system.": "{{1}} CLI komutu sisteminizde yüklü değil.",
+  "Try auto-detect": "Otomatik bulmayı dene",
+  "Failed to detect the installation location of {{1}}. Please try selecting it manually.": "{{1}}'in kurulu olduğu konum tespit edilemedi, lütfen elle seçmeyi deneyin.",
   "VLC path": "VLC dosya yolu",
   "Select 'vlc.exe' from the folder where VLC Player is installed": "VLC Player'ın kurulu olduğu klasörden vlc.exe'yi seçiniz",
   "Select vlc.exe": "vlc.exe'yi seç",
@@ -64,6 +68,7 @@ export default {
   "Start Syncplay": "Syncplay'i çalıştır",
   "Before you can use this command, you need to select 'Syncplay.exe' in the plugin settings":
     "Bu komutu kullanabilmek için öncelikle plugin ayarlarından 'Syncplay.exe'yi seçmeniz gerekmekte",
+  "To use the command, the ‘syncplay’ command must be installed on your system.": "Komutu kullanabilmek için sisteminizde 'syncplay' komutunun yüklü olması gerekmekte",
   //
   Snapshot: "Snapshot",
   "Snapshot folder": "Snapshot klasörü",
@@ -80,6 +85,7 @@ export default {
 
   /* vlcHelpers*/
   "Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings": "Plugini kullanabilmek için önce plugin ayarlarından 'vlc.exe'yi seçmeniz gerekmekte",
+  "To use the plugin, the ‘vlc’ command must be installed on your system.": "Plugini kullanabilmek için sisteminizde 'vlc' komutunun yüklü olması gerekmekte",
   "The port you selected is not usable, please enter another port value": "Seçtiğiniz port kullanılabilir değil, lütfen başka bir port değeri giriniz",
   "Could not connect to VLC Player.": "VLC Player'a bağlanılamadı.",
   "The vlc.exe specified in the settings could not be run, please check again!": "Ayarlarda belirtilen vlc.exe çalıştırılamadı, lütfen tekrar kontrol ediniz!",

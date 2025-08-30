@@ -25,6 +25,11 @@ export default {
     "Snapshot not found, if you made a change to the snapshot folder name, try restarting VLC.",
 
   /* settings */
+  "CLI command is available.": "{{1}} CLI command is available.",
+  "CLI command is not installed on your system.": "{{1}} CLI command is not installed on your system.",
+  "Try auto-detect": "Try auto-detect",
+  "Failed to detect the installation location of {{1}}. Please try selecting it manually.":
+    "Failed to detect the installation location of {{1}}. Please try selecting it manually.",
   "VLC path": "VLC path",
   "Select 'vlc.exe' from the folder where VLC Player is installed": "Select 'vlc.exe' from the folder where VLC Player is installed",
   "Select vlc.exe": "Select vlc.exe",
@@ -71,6 +76,7 @@ export default {
   "Start Syncplay": "Start Syncplay",
   "Before you can use this command, you need to select 'Syncplay.exe' in the plugin settings":
     "Before you can use this command, you need to select 'Syncplay.exe' in the plugin settings",
+  "To use the command, the ‘syncplay’ command must be installed on your system.": "To use the command, the ‘syncplay’ command must be installed on your system.",
   //
   Extra: "Extra",
   "Copy VLC Web Interface link": "Copy VLC Web Interface link",
@@ -80,6 +86,7 @@ export default {
 
   /* vlcHelpers*/
   "Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings": "Before you can use the plugin, you need to select 'vlc.exe' in the plugin settings",
+  "To use the plugin, the ‘vlc’ command must be installed on your system.": "To use the plugin, the ‘vlc’ command must be installed on your system.",
   "The port you selected is not usable, please enter another port value": "The port you selected is not usable, please enter another port value",
   "Could not connect to VLC Player.": "Could not connect to VLC Player.",
   "The vlc.exe specified in the settings could not be run, please check again!": "The vlc.exe specified in the settings could not be run, please check again!",
