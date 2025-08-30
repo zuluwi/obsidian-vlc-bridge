@@ -266,6 +266,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
                   ],
                 })
                 .then(async (result: { canceled: boolean; filePaths: string[] }) => {
+                  console.log("Selected file:", result);
                   if (!result.canceled && result.filePaths.length) {
                     const file = result.filePaths[0];
                     this.plugin.settings.vlcPath = file;
@@ -742,6 +743,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
                   ],
                 })
                 .then(async (result: { canceled: boolean; filePaths: string[] }) => {
+                  console.log("Selected file:", result);
                   if (!result.canceled && result.filePaths.length) {
                     const file = result.filePaths[0];
                     this.plugin.settings.syncplayPath = file;

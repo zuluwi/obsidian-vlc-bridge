@@ -419,23 +419,22 @@ export default class VLCBridgePlugin extends Plugin {
     if (!currentVideo) {
       return new Notice(t("A video must be open to add subtitles"));
     }
-    const input = document.createElement("input");
-    input.setAttribute("type", "file");
-    const supportedSubtitleFormats = extensionList.subtitle.map((e) => "." + e).join(",");
-    input.accept = supportedSubtitleFormats;
-    input.onchange = (e: Event) => {
-      const files = (e.target as HTMLInputElement)?.files as FileList;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+    // const input = document.createElement("input");
+    // input.setAttribute("type", "file");
+    // const supportedSubtitleFormats = extensionList.subtitle.map((e) => "." + e).join(",");
+    // input.accept = supportedSubtitleFormats;
+    // input.onchange = (e: Event) => {
+    //   const files = (e.target as HTMLInputElement)?.files as FileList;
+    //   for (let i = 0; i < files.length; i++) {
+    //     const file = files[i];
 
-        this.addSubtitle(file.path);
+    //     this.addSubtitle(file.path);
 
-        input.remove();
-      }
-    };
+    //     input.remove();
+    //   }
+    // };
 
     // input.click();
-    console.log(currentVideo);
 
     window.electron.remote.dialog
       .showOpenDialog({
@@ -453,7 +452,7 @@ export default class VLCBridgePlugin extends Plugin {
         if (!result.canceled && result.filePaths.length) {
           const file = result.filePaths[0];
           // const fileURI = new URL(file).href;
-          // console.log(file, fileURI);
+          console.log(result);
 
           // this.openVideo({ mediaPath: fileURI });
           this.addSubtitle(file);
