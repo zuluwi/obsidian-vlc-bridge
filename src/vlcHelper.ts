@@ -247,6 +247,10 @@ export function passPlugin(plugin: VLCBridgePlugin) {
 
       if (fileCheck) {
         if (fileCheck.current) {
+          const status = await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=seek&val=${timestamp}`);
+          if (status.json.state == "stopped") {
+            await requestUrl(`http://:${password_}@localhost:${port_}/requests/status.json?command=pl_pause`);
+          }
           if (subPath && subPath !== currentMedia.subtitlePath) {
             await addSubtitle(subPath, subDelay);
           }

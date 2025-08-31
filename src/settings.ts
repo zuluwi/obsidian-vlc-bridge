@@ -112,7 +112,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         createFragment((el) => {
           MarkdownRenderer.render(
             this.app,
-            `## \\[ **${this.plugin.settings.timestampLinktext}** ]( {{vlcBridge URI}} ) \n#### ${t("Placeholders")} \n- \`{{filename}}\` \n- \`{{timestamp}}\` \n`,
+            `## \\[ **${this.plugin.settings.timestampLinktext}** ]( {{vlcBridge URI}} ) \n#### ${t("Placeholders")} \n- \`{{filename}}\` \n- \`{{timestamp}}\` \n\n`,
             el.createDiv(),
             "",
             this.plugin
@@ -125,6 +125,43 @@ export class VBPluginSettingsTab extends PluginSettingTab {
             this.app,
             `## \\!\\[[ {{${t("Snapshot path")}}} | **${this.plugin.settings.snapshotLinktext}** ]] \n#### ${t("Placeholders")} \n- \`{{filename}}\` \n- \`{{timestamp}}\` \n`,
             el.createDiv(),
+            "",
+            this.plugin
+          );
+        })
+      );
+    };
+
+    const updateTemplatePreviews = () => {
+      let filename = "The.Shawshank.Redemption.1994";
+      let timestamp = "02:22:32";
+      let placeholderImgUrl = "https://a.ltrbxd.com/resized/sm/upload/1y/23/4e/ir/shawshank-redemption-1200-1200-675-675-crop-000000.jpg";
+
+      let tsLinkStr = `[${this.plugin.settings.timestampLinktext.replaceAll("{{filename}}", filename).replaceAll("{{timestamp}}", timestamp)}](vlcBridgeUri)`;
+      let tsLinkTemplateStr = this.plugin.settings.timestampLinkTemplate
+        .replaceAll("{{timestamplink}}", tsLinkStr)
+        .replaceAll("{{filename}}", filename)
+        .replaceAll("{{timestamp}}", timestamp);
+      let ssLinkStr = `![${this.plugin.settings.snapshotLinktext.replaceAll("{{filename}}", filename).replaceAll("{{timestamp}}", timestamp)}](${placeholderImgUrl})`;
+      let ssLinkTemplateStr = this.plugin.settings.snapshotLinkTemplate
+        .replaceAll("{{timestamplink}}", tsLinkStr)
+        .replaceAll("{{filename}}", filename)
+        .replaceAll("{{timestamp}}", timestamp)
+        .replaceAll("{{snapshot}}", ssLinkStr);
+
+      tsTemplatePreview.setName(
+        createFragment((el) => {
+          MarkdownRenderer.render(this.app, `## Timestamp Preview\n${tsLinkTemplateStr}\n`, el.createDiv(), "", this.plugin);
+        })
+      );
+      ssTemplatePreview.setName(
+        createFragment((el) => {
+          MarkdownRenderer.render(
+            this.app,
+
+            `## Snapshot Preview\n${ssLinkTemplateStr}\n`,
+            el.createDiv(),
+
             "",
             this.plugin
           );
@@ -212,6 +249,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
                 this.plugin.settings.vlcPath = installedPath;
                 selectVLCDescEl.innerText = installedPath;
                 await this.plugin.saveSettings();
+                vlcPathToggle.setValue(this.plugin.settings.commandPath == "vlcPath" && this.plugin.settings.vlcPath?.length > 0);
                 vlcPathToggle.setDisabled(this.plugin.settings.commandPath == "vlcPath" && this.plugin.settings.vlcPath?.length > 0);
                 if (this.plugin.settings.commandPath == "vlcPath") {
                   setSettingDesc();
@@ -410,6 +448,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
             this.plugin.settings.timestampLinktext = value;
             await this.plugin.saveSettings();
             setSettingDesc();
+            updateTemplatePreviews();
           });
         text.inputEl.addClasses(["vlc-bridge-text-input", "linktext"]);
         return text;
@@ -435,7 +474,9 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.timestampLinkTemplate)
           .onChange(async (value) => {
             this.plugin.settings.timestampLinkTemplate = value;
-            this.plugin.saveSettings();
+            await this.plugin.saveSettings();
+            // setSettingDesc();
+            updateTemplatePreviews();
           });
 
         text.inputEl.cols = 50;
@@ -450,6 +491,8 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           this.display();
         })
       );
+    // const tsTemplatePreview = containerEl.createDiv();
+    const tsTemplatePreview = new Setting(containerEl);
 
     containerEl.createEl("h2", { text: t("Snapshot embed") });
 
@@ -463,6 +506,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
             this.plugin.settings.snapshotLinktext = value;
             await this.plugin.saveSettings();
             setSettingDesc();
+            updateTemplatePreviews();
           });
         text.inputEl.addClasses(["vlc-bridge-text-input", "linktext"]);
       })
@@ -475,7 +519,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-
       .setName(t("Snapshot template"))
       .setDesc(
         createFragment((el) => {
@@ -494,7 +537,9 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.snapshotLinkTemplate)
           .onChange(async (value) => {
             this.plugin.settings.snapshotLinkTemplate = value;
-            this.plugin.saveSettings();
+            await this.plugin.saveSettings();
+            // setSettingDesc();
+            updateTemplatePreviews();
           });
 
         text.inputEl.cols = 50;
@@ -509,6 +554,9 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           this.display();
         })
       );
+
+    // const ssTemplatePreview = containerEl.createDiv();
+    const ssTemplatePreview = new Setting(containerEl);
 
     new Setting(containerEl).setName(t("Seeking amounts")).setHeading();
 
@@ -689,6 +737,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
                 selectSPDescEl.innerText = installedPath;
 
                 await this.plugin.saveSettings();
+                spPathToggle.setValue(this.plugin.settings.spCommandPath == "spPath" && this.plugin.settings.syncplayPath?.length > 0);
                 spPathToggle.setDisabled(this.plugin.settings.spCommandPath == "spPath" && this.plugin.settings.syncplayPath?.length > 0);
                 if (this.plugin.settings.spCommandPath == "spPath") {
                   setSettingDesc();
@@ -813,6 +862,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     );
 
     setSettingDesc();
+    updateTemplatePreviews();
   }
   hide() {
     const updateSnapshotFolder = async () => {
