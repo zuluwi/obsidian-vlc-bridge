@@ -25,8 +25,8 @@ export default {
     "Snapshot bulunamadı, eğer snapshot klasörü adında bir değişiklik yaptıysanız VLC'yi yeniden başlatmayı deneyiniz.",
 
   /* settings */
-  "CLI command is available.": "{{1}} CLI komutu kullanılabilir durumda.",
-  "CLI command is not installed on your system.": "{{1}} CLI komutu sisteminizde yüklü değil.",
+  "{{1}} CLI command is available.": "{{1}} CLI komutu kullanılabilir durumda.",
+  "{{1}} CLI command is not installed on your system.": "{{1}} CLI komutu sisteminizde yüklü değil.",
   "Try auto-detect": "Otomatik bulmayı dene",
   "Failed to detect the installation location of {{1}}. Please try selecting it manually.": "{{1}}'in kurulu olduğu konum tespit edilemedi, lütfen elle seçmeyi deneyin.",
   "VLC path": "VLC dosya yolu",

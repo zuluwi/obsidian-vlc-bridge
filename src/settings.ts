@@ -176,7 +176,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       vlcCliCheck
         .setDesc(
           createFragment((el) => {
-            MarkdownRenderer.render(this.app, `## ${t("CLI command is available.", ["**`vlc`**"])}\n`, el.createDiv(), "", this.plugin);
+            MarkdownRenderer.render(this.app, `## ${t("{{1}} CLI command is available.", ["**`vlc`**"])}\n`, el.createDiv(), "", this.plugin);
           })
         )
         .addButton((btn) => {
@@ -209,14 +209,14 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       vlcCliCheck
         .setDesc(
           createFragment((el) => {
-            MarkdownRenderer.render(this.app, `## ${t("CLI command is not installed on your system.", ["**`vlc`**"])}\n`, el.createDiv(), "", this.plugin);
+            MarkdownRenderer.render(this.app, `## ${t("{{1}} CLI command is not installed on your system.", ["**`vlc`**"])}\n`, el.createDiv(), "", this.plugin);
           })
         )
         .addButton((btn) => {
           btn
             .setIcon("lucide-unlink")
             .setDisabled(true)
-            .setTooltip(t("CLI command is not installed on your system.", [`'vlc'`]));
+            .setTooltip(t("{{1}} CLI command is not installed on your system.", [`'vlc'`]));
         });
       if (Platform.isWin) {
         vlcCliCheck.addToggle((toggle) => {
@@ -664,7 +664,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       spCliCheck
         .setDesc(
           createFragment((el) => {
-            MarkdownRenderer.render(this.app, `## ${t("CLI command is available.", ["**`syncplay`**"])}\n`, el.createDiv(), "", this.plugin);
+            MarkdownRenderer.render(this.app, `## ${t("{{1}} CLI command is available.", ["**`syncplay`**"])}\n`, el.createDiv(), "", this.plugin);
           })
         )
         .addButton((btn) => {
@@ -697,14 +697,14 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       spCliCheck
         .setDesc(
           createFragment((el) => {
-            MarkdownRenderer.render(this.app, `## ${t("CLI command is not installed on your system.", ["**`syncplay`**"])}\n`, el.createDiv(), "", this.plugin);
+            MarkdownRenderer.render(this.app, `## ${t("{{1}} CLI command is not installed on your system.", ["**`syncplay`**"])}\n`, el.createDiv(), "", this.plugin);
           })
         )
         .addButton((btn) => {
           btn
             .setIcon("lucide-unlink")
             .setDisabled(true)
-            .setTooltip(t("CLI command is not installed on your system.", [`'syncplay'`]));
+            .setTooltip(t("{{1}} CLI command is not installed on your system.", [`'syncplay'`]));
         });
       if (Platform.isWin) {
         spCliCheck.addToggle((toggle) => {

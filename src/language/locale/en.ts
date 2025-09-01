@@ -25,8 +25,8 @@ export default {
     "Snapshot not found, if you made a change to the snapshot folder name, try restarting VLC.",
 
   /* settings */
-  "CLI command is available.": "{{1}} CLI command is available.",
-  "CLI command is not installed on your system.": "{{1}} CLI command is not installed on your system.",
+  "{{1}} CLI command is available.": "{{1}} CLI command is available.",
+  "{{1}} CLI command is not installed on your system.": "{{1}} CLI command is not installed on your system.",
   "Try auto-detect": "Try auto-detect",
   "Failed to detect the installation location of {{1}}. Please try selecting it manually.":
     "Failed to detect the installation location of {{1}}. Please try selecting it manually.",
