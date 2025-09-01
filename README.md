@@ -48,8 +48,12 @@ Or:
 
 ## Usage
 
-> [!important]
-> To use the plugin, you must first select `vlc.exe` in the plugin settings from the location where VLC Player is installed and then set a port number
+> [!important] 
+> To use the plugin, 
+> - for Windows, you must first select `vlc.exe` in the plugin settings from the location where VLC Media Player is installed,
+> - for Linux and macOS, you must install the `vlc` command line on your system
+> 
+> and then set a port number
 
 ### Opening Video
 
@@ -98,7 +102,7 @@ Open the command palette (Ctrl+P) and use the `Take and paste snapshot from vide
 
 ### Running Syncplay with plugin arguments
 
-[Syncplay](https://github.com/Syncplay/syncplay?tab=readme-ov-file#syncplay) is an application that connects to an online server to open the preferred player and synchronizes the connected players. By selecting `Syncplay.exe` from the plugin settings and clicking the **Start Syncplay** button, you can start Syncplay so that the plugin interacts with the VLC Player that the app will open.
+[Syncplay](https://github.com/Syncplay/syncplay?tab=readme-ov-file#syncplay) is an application that connects to an online server to open the preferred player and synchronizes the connected players. If the `syncplay` command line is installed on your system, or in Windows by selecting `Syncplay.exe` from the plugin settings and clicking the **Start Syncplay** button, you can start Syncplay so that the plugin interacts with the VLC Player that the app will open.
 
 > [!tip]
 > Create a shortcut with the url `obsidian://vlcBridge-runSyncplay` to open Obsidian and then Syncplay
