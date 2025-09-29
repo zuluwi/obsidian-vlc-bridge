@@ -96,7 +96,7 @@ export default {
   "Keep transcript view when app closed": "Uygulama kapatıldığında transkript görünümünü kaydet",
   "“Transcript View” tabs that you opened will be saved and then will re-open them the next time you launch Obsidian. If it takes a long time to load or may crash Obsidian, it is not recommended to use this feature.":
     "Açtığınız “Transkript Görünümü” sekmeleri kaydedilir ve ardından uygulamayı sonraki açışınızda tekrar açılır. Eğer bu sekmelerin yüklenmesi zaman alıyor veya Obsidian'ın çökmesine neden olabiliyorsa bu özelliği kullanmanız önerilmez.",
-  "Use simplier format in transcript tiew": "Transkript görünümünde sade şablon kullan",
+  "Use simplier format in transcript view": "Transkript görünümünde sade şablon kullan",
   "If loading tab with your template takes a while, it is recommended to use this option. Original template will be used again when you copy the dialog.":
     "Eğer şablonunuzla sekmenin yüklenmesi zaman alıyorsa bu seçeneği kullanmanız önerilir. Diyaloğu kopyaladığınızda yine orijinal şablon kullanılacaktır",
   "Search only in dialog texts": "Aramaya sadece diyalog metinlerini dahil et",
