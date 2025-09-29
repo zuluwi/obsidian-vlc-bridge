@@ -10,3 +10,70 @@
 .vlc-bridge-text-input.linktext {
   width: 20em !important;
 }
+.vlc-bridge-transcriptView {
+  display: flex;
+  flex-direction: column;
+  height: inherit;
+  user-select: text;
+}
+.vlc-bridge-transcript-options {
+  display: flex;
+  justify-content: space-around;
+  padding-bottom: 0.5em;
+  transform: scaleY(1);
+  transition: transform 400ms ease 0ms display 1s;
+
+  &.searchEl {
+    display: flex;
+  }
+  &.hide {
+    display: none;
+    transform: scaleY(0);
+    transition: transform 400ms ease 0ms display 1s;
+  }
+}
+.vlc-bridge-trabscript-search-count {
+  align-content: center;
+  padding-left: 0.3em;
+}
+.vlc-bridge-dialog-container {
+  overflow: scroll;
+}
+.vlc-bridge-ts-dialog {
+  display: flex;
+  align-items: center;
+  transition: 1s;
+  padding-inline-end: 0.5em;
+}
+.vlc-bridge-ts-dialog-options {
+  float: inline-start;
+  padding: 0.7em;
+}
+.vlc-bridge-ts-dialog-text {
+  float: inline-end;
+  flex: content;
+}
+.vlc-bridge-ts-dialog-focus {
+  /* background-color: var(--interactive-normal); */
+  /* background-color: var(--background-active-parent); */
+  background-color: var(--table-selection);
+  transition: 0.2s;
+}
+.vlc-bridge-ts-dialog-search {
+  background-color: var(--code-value);
+
+  transition: 0.2s;
+  &.current {
+    background-color: var(--text-error);
+  }
+}
+.vlc-bridge-subtitle-notice-options {
+  display: flex;
+  justify-content: space-evenly;
+}
+.vlc-bridge-ts-separator {
+  margin: 0;
+}
+.vlc-bridge-ts-ss-embed {
+  cursor: pointer;
+}

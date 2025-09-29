@@ -1,10 +1,12 @@
-import { App, Notice, PluginSettingTab, Setting, MarkdownRenderer, SliderComponent, TextComponent, ButtonComponent, ToggleComponent, Platform } from "obsidian";
+import { App, Notice, PluginSettingTab, Setting, MarkdownRenderer, SliderComponent, TextComponent, ButtonComponent, ToggleComponent, Platform, TFile } from "obsidian";
 import VLCBridgePlugin from "./main";
 import { t } from "./language/helpers";
 import { currentConfig } from "./vlcHelper";
 import isPortReachable from "is-port-reachable";
 import * as childProcess from "child_process";
 import * as path from "path";
+import { formatSubText, subtitlePlaceholder } from "./subtitleParser";
+import { VIEW_TYPE_VB } from "./transcriptView";
 
 declare global {
   interface Window {
@@ -34,6 +36,12 @@ export interface VBPluginSettings {
   snapshotLinkTemplate: string;
   commandPath: "cli" | "vlcPath";
   spCommandPath: "cli" | "spPath";
+  keepTranscriptViews: boolean;
+  useSimplierTranscriptFormat: boolean;
+  onlySearchWithinTextInTranscriptView: boolean;
+  jumpMiddleOfDialog: boolean;
+  showAllSnapshotsInRange: boolean;
+  transcriptTemplate: string;
 }
 
 export const DEFAULT_SETTINGS: VBPluginSettings = {
@@ -59,13 +67,15 @@ export const DEFAULT_SETTINGS: VBPluginSettings = {
   snapshotLinkTemplate: "{{timestamplink}} \n{{snapshot}} \n",
   commandPath: "cli",
   spCommandPath: "cli",
+  keepTranscriptViews: false,
+  useSimplierTranscriptFormat: false,
+  onlySearchWithinTextInTranscriptView: true,
+  jumpMiddleOfDialog: false,
+  showAllSnapshotsInRange: false,
+  transcriptTemplate: "{{index}}. {{from}} >> {{to}}\n{{text}}",
 };
 
-const snapshotExts: {
-  png: "png";
-  jpg: "jpg";
-  tiff: "tiff";
-} = {
+const snapshotExts = {
   png: "png",
   jpg: "jpg",
   tiff: "tiff",
@@ -74,6 +84,7 @@ const snapshotExts: {
 export class VBPluginSettingsTab extends PluginSettingTab {
   plugin: VLCBridgePlugin;
   lastSnapshotPath: string;
+  lasttranscriptTemplate: string;
   constructor(app: App, plugin: VLCBridgePlugin) {
     super(app, plugin);
     this.plugin = plugin;
@@ -130,20 +141,51 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           );
         })
       );
+      transcriptTemplateSetting.setDesc(
+        createFragment((el) => {
+          MarkdownRenderer.render(
+            this.app,
+            `#### ${t("Placeholders")} \n- \`{{index}}\` \n- \`{{from}}\` \n- \`{{to}}\` \n- \`{{text}}\`\n- \`{{snapshot}}\`\n${
+              this.plugin.settings.transcriptTemplate.includes("{{snapshot}}")
+                ? `\n>[!info]\n>${t("For the {{1}} values in your template, snapshot will be captured and inserted when you copy the dialogs.", ["`{{snapshot}}`"])}\n`
+                : ""
+            }`,
+            el.createDiv(),
+            "",
+            this.plugin
+          );
+        })
+      );
     };
 
-    const updateTemplatePreviews = () => {
-      let filename = "The.Shawshank.Redemption.1994";
-      let timestamp = "02:22:32";
-      let placeholderImgUrl = "https://a.ltrbxd.com/resized/sm/upload/1y/23/4e/ir/shawshank-redemption-1200-1200-675-675-crop-000000.jpg";
+    let snapshots = this.app.vault.getFiles().filter((f) => f.path.startsWith(this.plugin.settings.snapshotFolder) && Object.values(snapshotExts).includes(f.extension));
+    let placeholderSnapshot: TFile | undefined;
+    let placeholderFilename: string | undefined;
+    let placeholderTimestamp: string | undefined;
 
-      let tsLinkStr = `[${this.plugin.settings.timestampLinktext.replaceAll("{{filename}}", filename).replaceAll("{{timestamp}}", timestamp)}](vlcBridgeUri)`;
-      let tsLinkTemplateStr = this.plugin.settings.timestampLinkTemplate
+    if (snapshots.length > 0) {
+      placeholderSnapshot = snapshots[Math.round(Math.random() * snapshots.length - 1)];
+      placeholderFilename = this.plugin.snapshotPathToMs(placeholderSnapshot.path)?.filename;
+      placeholderTimestamp = this.plugin.snapshotPathToMs(placeholderSnapshot.path)?.timestamp;
+    }
+    const blankSnapshot =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAAA10dzkAAAYoElEQVR4Xu3WQREAIAwDQRCPAqQiAGawcVsH2fSRefa6wxEgQIAAAQIECGQEpgGY6VpQAgQIECBAgMAXMAA9AgECBAgQIEAgJmAAxgoXlwABAgQIECBgAPoBAgQIECBAgEBMwACMFS4uAQIECBAgQMAA9AMECBAgQIAAgZiAARgrXFwCBAgQIECAgAHoBwgQIECAAAECMQEDMFa4uAQIECBAgAABA9APECBAgAABAgRiAgZgrHBxCRAgQIAAAQIGoB8gQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB+gAABAgQIECAQEzAAY4WLS4AAAQIECBAwAP0AAQIECBAgQCAmYADGCheXAAECBAgQIGAA+gECBAgQIECAQEzAAIwVLi4BAgQIECBAwAD0AwQIECBAgACBmIABGCtcXAIECBAgQICAAegHCBAgQIAAAQIxAQMwVri4BAgQIECAAAED0A8QIECAAAECBGICBmCscHEJECBAgAABAgagHyBAgAABAgQIxAQMwFjh4hIgQIAAAQIEDEA/QIAAAQIECBCICRiAscLFJUCAAAECBAgYgH6AAAECBAgQIBATMABjhYtLgAABAgQIEDAA/QABAgQIECBAICZgAMYKF5cAAQIECBAgYAD6AQIECBAgQIBATMAAjBUuLgECBAgQIEDAAPQDBAgQIECAAIGYgAEYK1xcAgQIECBAgIAB6AcIECBAgAABAjEBAzBWuLgECBAgQIAAAQPQDxAgQIAAAQIEYgIGYKxwcQkQIECAAAECBqAfIECAAAECBAjEBAzAWOHiEiBAgAABAgQMQD9AgAABAgQIEIgJGICxwsUlQIAAAQIECBiAfoAAAQIECBAgEBMwAGOFi0uAAAECBAgQMAD9AAECBAgQIEAgJmAAxgoXlwABAgQIECBgAPoBAgQIECBAgEBMwACMFS4uAQIECBAgQMAA9AMECBAgQIAAgZiAARgrXFwCBAgQIECAgAHoBwgQIECAAAECMQEDMFa4uAQIECBAgAABA9APECBAgAABAgRiAgZgrHBxCRAgQIAAAQIGoB8gQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB+gAABAgQIECAQEzAAY4WLS4AAAQIECBAwAP0AAQIECBAgQCAmYADGCheXAAECBAgQIGAA+gECBAgQIECAQEzAAIwVLi4BAgQIECBAwAD0AwQIECBAgACBmIABGCtcXAIECBAgQICAAegHCBAgQIAAAQIxAQMwVri4BAgQIECAAAED0A8QIECAAAECBGICBmCscHEJECBAgAABAgagHyBAgAABAgQIxAQMwFjh4hIgQIAAAQIEDEA/QIAAAQIECBCICRiAscLFJUCAAAECBAgYgH6AAAECBAgQIBATMABjhYtLgAABAgQIEDAA/QABAgQIECBAICZgAMYKF5cAAQIECBAgYAD6AQIECBAgQIBATMAAjBUuLgECBAgQIEDAAPQDBAgQIECAAIGYgAEYK1xcAgQIECBAgIAB6AcIECBAgAABAjEBAzBWuLgECBAgQIAAAQPQDxAgQIAAAQIEYgIGYKxwcQkQIECAAAECBqAfIECAAAECBAjEBAzAWOHiEiBAgAABAgQMQD9AgAABAgQIEIgJGICxwsUlQIAAAQIECBiAfoAAAQIECBAgEBMwAGOFi0uAAAECBAgQMAD9AAECBAgQIEAgJmAAxgoXlwABAgQIECBgAPoBAgQIECBAgEBMwACMFS4uAQIECBAgQMAA9AMECBAgQIAAgZiAARgrXFwCBAgQIECAgAHoBwgQIECAAAECMQEDMFa4uAQIECBAgAABA9APECBAgAABAgRiAgZgrHBxCRAgQIAAAQIGoB8gQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB+gAABAgQIECAQEzAAY4WLS4AAAQIECBAwAP0AAQIECBAgQCAmYADGCheXAAECBAgQIGAA+gECBAgQIECAQEzAAIwVLi4BAgQIECBAwAD0AwQIECBAgACBmIABGCtcXAIECBAgQICAAegHCBAgQIAAAQIxAQMwVri4BAgQIECAAAED0A8QIECAAAECBGICBmCscHEJECBAgAABAgagHyBAgAABAgQIxAQMwFjh4hIgQIAAAQIEDEA/QIAAAQIECBCICRiAscLFJUCAAAECBAgYgH6AAAECBAgQIBATMABjhYtLgAABAgQIEDAA/QABAgQIECBAICZgAMYKF5cAAQIECBAgYAD6AQIECBAgQIBATMAAjBUuLgECBAgQIEDAAPQDBAgQIECAAIGYgAEYK1xcAgQIECBAgIAB6AcIECBAgAABAjEBAzBWuLgECBAgQIAAAQPQDxAgQIAAAQIEYgIGYKxwcQkQIECAAAECBqAfIECAAAECBAjEBAzAWOHiEiBAgAABAgQMQD9AgAABAgQIEIgJGICxwsUlQIAAAQIECBiAfoAAAQIECBAgEBMwAGOFi0uAAAECBAgQMAD9AAECBAgQIEAgJmAAxgoXlwABAgQIECBgAPoBAgQIECBAgEBMwACMFS4uAQIECBAgQMAA9AMECBAgQIAAgZiAARgrXFwCBAgQIECAgAHoBwgQIECAAAECMQEDMFa4uAQIECBAgAABA9APECBAgAABAgRiAgZgrHBxCRAgQIAAAQIGoB8gQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB+gAABAgQIECAQEzAAY4WLS4AAAQIECBAwAP0AAQIECBAgQCAmYADGCheXAAECBAgQIGAA+gECBAgQIECAQEzAAIwVLi4BAgQIECBAwAD0AwQIECBAgACBmIABGCtcXAIECBAgQICAAegHCBAgQIAAAQIxAQMwVri4BAgQIECAAAED0A8QIECAAAECBGICBmCscHEJECBAgAABAgagHyBAgAABAgQIxAQMwFjh4hIgQIAAAQIEDEA/QIAAAQIECBCICRiAscLFJUCAAAECBAgYgH6AAAECBAgQIBATMABjhYtLgAABAgQIEDAA/QABAgQIECBAICZgAMYKF5cAAQIECBAgYAD6AQIECBAgQIBATMAAjBUuLgECBAgQIEDAAPQDBAgQIECAAIGYgAEYK1xcAgQIECBAgIAB6AcIECBAgAABAjEBAzBWuLgECBAgQIAAAQPQDxAgQIAAAQIEYgIGYKxwcQkQIECAAAECBqAfIECAAAECBAjEBAzAWOHiEiBAgAABAgQMQD9AgAABAgQIEIgJGICxwsUlQIAAAQIECBiAfoAAAQIECBAgEBMwAGOFi0uAAAECBAgQMAD9AAECBAgQIEAgJmAAxgoXlwABAgQIECBgAPoBAgQIECBAgEBMwACMFS4uAQIECBAgQMAA9AMECBAgQIAAgZiAARgrXFwCBAgQIECAgAHoBwgQIECAAAECMQEDMFa4uAQIECBAgAABA9APECBAgAABAgRiAgZgrHBxCRAgQIAAAQIGoB8gQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB+gAABAgQIECAQEzAAY4WLS4AAAQIECBAwAP0AAQIECBAgQCAmYADGCheXAAECBAgQIGAA+gECBAgQIECAQEzAAIwVLi4BAgQIECBAwAD0AwQIECBAgACBmIABGCtcXAIECBAgQICAAegHCBAgQIAAAQIxAQMwVri4BAgQIECAAAED0A8QIECAAAECBGICBmCscHEJECBAgAABAgagHyBAgAABAgQIxAQMwFjh4hIgQIAAAQIEDEA/QIAAAQIECBCICRiAscLFJUCAAAECBAgYgH6AAAECBAgQIBATMABjhYtLgAABAgQIEDAA/QABAgQIECBAICZgAMYKF5cAAQIECBAgYAD6AQIECBAgQIBATMAAjBUuLgECBAgQIEDAAPQDBAgQIECAAIGYgAEYK1xcAgQIECBAgIAB6AcIECBAgAABAjEBAzBWuLgECBAgQIAAAQPQDxAgQIAAAQIEYgIGYKxwcQkQIECAAAECBqAfIECAAAECBAjEBAzAWOHiEiBAgAABAgQMQD9AgAABAgQIEIgJGICxwsUlQIAAAQIECBiAfoAAAQIECBAgEBMwAGOFi0uAAAECBAgQMAD9AAECBAgQIEAgJmAAxgoXlwABAgQIECBgAPoBAgQIECBAgEBMwACMFS4uAQIECBAgQMAA9AMECBAgQIAAgZiAARgrXFwCBAgQIECAgAHoBwgQIECAAAECMQEDMFa4uAQIECBAgAABA9APECBAgAABAgRiAgZgrHBxCRAgQIAAAQIGoB8gQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB+gAABAgQIECAQEzAAY4WLS4AAAQIECBAwAP0AAQIECBAgQCAmYADGCheXAAECBAgQIGAA+gECBAgQIECAQEzAAIwVLi4BAgQIECBAwAD0AwQIECBAgACBmIABGCtcXAIECBAgQICAAegHCBAgQIAAAQIxAQMwVri4BAgQIECAAAED0A8QIECAAAECBGICBmCscHEJECBAgAABAgagHyBAgAABAgQIxAQMwFjh4hIgQIAAAQIEDEA/QIAAAQIECBCICRiAscLFJUCAAAECBAgYgH6AAAECBAgQIBATMABjhYtLgAABAgQIEDAA/QABAgQIECBAICZgAMYKF5cAAQIECBAgYAD6AQIECBAgQIBATMAAjBUuLgECBAgQIEDAAPQDBAgQIECAAIGYgAEYK1xcAgQIECBAgIAB6AcIECBAgAABAjEBAzBWuLgECBAgQIAAAQPQDxAgQIAAAQIEYgIGYKxwcQkQIECAAAECBqAfIECAAAECBAjEBAzAWOHiEiBAgAABAgQMQD9AgAABAgQIEIgJGICxwsUlQIAAAQIECBiAfoAAAQIECBAgEBMwAGOFi0uAAAECBAgQMAD9AAECBAgQIEAgJmAAxgoXlwABAgQIECBgAPoBAgQIECBAgEBMwACMFS4uAQIECBAgQMAA9AMECBAgQIAAgZiAARgrXFwCBAgQIECAgAHoBwgQIECAAAECMQEDMFa4uAQIECBAgAABA9APECBAgAABAgRiAgZgrHBxCRAgQIAAAQIGoB8gQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB+gAABAgQIECAQEzAAY4WLS4AAAQIECBAwAP0AAQIECBAgQCAmYADGCheXAAECBAgQIGAA+gECBAgQIECAQEzAAIwVLi4BAgQIECBAwAD0AwQIECBAgACBmIABGCtcXAIECBAgQICAAegHCBAgQIAAAQIxAQMwVri4BAgQIECAAAED0A8QIECAAAECBGICBmCscHEJECBAgAABAgagHyBAgAABAgQIxAQMwFjh4hIgQIAAAQIEDEA/QIAAAQIECBCICRiAscLFJUCAAAECBAgYgH6AAAECBAgQIBATMABjhYtLgAABAgQIEDAA/QABAgQIECBAICZgAMYKF5cAAQIECBAgYAD6AQIECBAgQIBATMAAjBUuLgECBAgQIEDAAPQDBAgQIECAAIGYgAEYK1xcAgQIECBAgIAB6AcIECBAgAABAjEBAzBWuLgECBAgQIAAAQPQDxAgQIAAAQIEYgIGYKxwcQkQIECAAAECBqAfIECAAAECBAjEBAzAWOHiEiBAgAABAgQMQD9AgAABAgQIEIgJGICxwsUlQIAAAQIECBiAfoAAAQIECBAgEBMwAGOFi0uAAAECBAgQMAD9AAECBAgQIEAgJmAAxgoXlwABAgQIECBgAPoBAgQIECBAgEBMwACMFS4uAQIECBAgQMAA9AMECBAgQIAAgZiAARgrXFwCBAgQIECAgAHoBwgQIECAAAECMQEDMFa4uAQIECBAgAABA9APECBAgAABAgRiAgZgrHBxCRAgQIAAAQIGoB8gQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB+gAABAgQIECAQEzAAY4WLS4AAAQIECBAwAP0AAQIECBAgQCAmYADGCheXAAECBAgQIGAA+gECBAgQIECAQEzAAIwVLi4BAgQIECBAwAD0AwQIECBAgACBmIABGCtcXAIECBAgQICAAegHCBAgQIAAAQIxAQMwVri4BAgQIECAAAED0A8QIECAAAECBGICBmCscHEJECBAgAABAgagHyBAgAABAgQIxAQMwFjh4hIgQIAAAQIEDEA/QIAAAQIECBCICRiAscLFJUCAAAECBAgYgH6AAAECBAgQIBATMABjhYtLgAABAgQIEDAA/QABAgQIECBAICZgAMYKF5cAAQIECBAgYAD6AQIECBAgQIBATMAAjBUuLgECBAgQIEDAAPQDBAgQIECAAIGYgAEYK1xcAgQIECBAgIAB6AcIECBAgAABAjEBAzBWuLgECBAgQIAAAQPQDxAgQIAAAQIEYgIGYKxwcQkQIECAAAECBqAfIECAAAECBAjEBAzAWOHiEiBAgAABAgQMQD9AgAABAgQIEIgJGICxwsUlQIAAAQIECBiAfoAAAQIECBAgEBMwAGOFi0uAAAECBAgQMAD9AAECBAgQIEAgJmAAxgoXlwABAgQIECBgAPoBAgQIECBAgEBMwACMFS4uAQIECBAgQMAA9AMECBAgQIAAgZiAARgrXFwCBAgQIECAgAHoBwgQIECAAAECMQEDMFa4uAQIECBAgAABA9APECBAgAABAgRiAgZgrHBxCRAgQIAAAQIGoB8gQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB+gAABAgQIECAQEzAAY4WLS4AAAQIECBAwAP0AAQIECBAgQCAmYADGCheXAAECBAgQIGAA+gECBAgQIECAQEzAAIwVLi4BAgQIECBAwAD0AwQIECBAgACBmIABGCtcXAIECBAgQICAAegHCBAgQIAAAQIxAQMwVri4BAgQIECAAAED0A8QIECAAAECBGICBmCscHEJECBAgAABAgagHyBAgAABAgQIxAQMwFjh4hIgQIAAAQIEDEA/QIAAAQIECBCICRiAscLFJUCAAAECBAgYgH6AAAECBAgQIBATMABjhYtLgAABAgQIEDAA/QABAgQIECBAICZgAMYKF5cAAQIECBAgYAD6AQIECBAgQIBATMAAjBUuLgECBAgQIEDAAPQDBAgQIECAAIGYgAEYK1xcAgQIECBAgIAB6AcIECBAgAABAjEBAzBWuLgECBAgQIAAAQPQDxAgQIAAAQIEYgIGYKxwcQkQIECAAAECBqAfIECAAAECBAjEBAzAWOHiEiBAgAABAgQMQD9AgAABAgQIEIgJGICxwsUlQIAAAQIECBiAfoAAAQIECBAgEBMwAGOFi0uAAAECBAgQMAD9AAECBAgQIEAgJmAAxgoXlwABAgQIECBgAPoBAgQIECBAgEBMwACMFS4uAQIECBAgQMAA9AMECBAgQIAAgZiAARgrXFwCBAgQIECAgAHoBwgQIECAAAECMQEDMFa4uAQIECBAgAABA9APECBAgAABAgRiAgZgrHBxCRAgQIAAAQIGoB8gQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB+gAABAgQIECAQEzAAY4WLS4AAAQIECBAwAP0AAQIECBAgQCAmYADGCheXAAECBAgQIGAA+gECBAgQIECAQEzAAIwVLi4BAgQIECBAwAD0AwQIECBAgACBmIABGCtcXAIECBAgQICAAegHCBAgQIAAAQIxAQMwVri4BAgQIECAAAED0A8QIECAAAECBGICBmCscHEJECBAgAABAgagHyBAgAABAgQIxAQMwFjh4hIgQIAAAQIEDEA/QIAAAQIECBCICRiAscLFJUCAAAECBAgYgH6AAAECBAgQIBATMABjhYtLgAABAgQIEDAA/QABAgQIECBAICZgAMYKF5cAAQIECBAgYAD6AQIECBAgQIBATMAAjBUuLgECBAgQIEDAAPQDBAgQIECAAIGYgAEYK1xcAgQIECBAgIAB6AcIECBAgAABAjEBAzBWuLgECBAgQIAAAQPQDxAgQIAAAQIEYgIGYKxwcQkQIECAAAECBqAfIECAAAECBAjEBAzAWOHiEiBAgAABAgQMQD9AgAABAgQIEIgJGICxwsUlQIAAAQIECDxCyLTs0ABWzAAAAABJRU5ErkJggg==";
+
+    let filename = placeholderFilename || "The.Shawshank.Redemption.1994";
+    let timestamp = placeholderTimestamp || "02:22:32";
+    let placeholderImgUrl = placeholderSnapshot ? this.app.vault.adapter.getFilePath(placeholderSnapshot.path) : blankSnapshot;
+    let tsLinkStr: string;
+    let tsLinkTemplateStr: string;
+    let ssLinkStr: string;
+    let ssLinkTemplateStr: string;
+    const updateTemplatePreviews = () => {
+      tsLinkStr = `[${this.plugin.settings.timestampLinktext.replaceAll("{{filename}}", filename).replaceAll("{{timestamp}}", timestamp)}](vlcBridgeUri)`;
+      tsLinkTemplateStr = this.plugin.settings.timestampLinkTemplate
         .replaceAll("{{timestamplink}}", tsLinkStr)
         .replaceAll("{{filename}}", filename)
         .replaceAll("{{timestamp}}", timestamp);
-      let ssLinkStr = `![${this.plugin.settings.snapshotLinktext.replaceAll("{{filename}}", filename).replaceAll("{{timestamp}}", timestamp)}](${placeholderImgUrl})`;
-      let ssLinkTemplateStr = this.plugin.settings.snapshotLinkTemplate
+      ssLinkStr = `![${this.plugin.settings.snapshotLinktext.replaceAll("{{filename}}", filename).replaceAll("{{timestamp}}", timestamp)}](${placeholderImgUrl})`;
+      ssLinkTemplateStr = this.plugin.settings.snapshotLinkTemplate
         .replaceAll("{{timestamplink}}", tsLinkStr)
         .replaceAll("{{filename}}", filename)
         .replaceAll("{{timestamp}}", timestamp)
@@ -151,20 +193,28 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
       tsTemplatePreview.setName(
         createFragment((el) => {
-          MarkdownRenderer.render(this.app, `## Timestamp Preview\n${tsLinkTemplateStr}\n`, el.createDiv(), "", this.plugin);
+          MarkdownRenderer.render(this.app, `## ${t("Timestamp preview")}\n${tsLinkTemplateStr}\n`, el.createDiv(), "", this.plugin);
         })
       );
       ssTemplatePreview.setName(
         createFragment((el) => {
-          MarkdownRenderer.render(
-            this.app,
-
-            `## Snapshot Preview\n${ssLinkTemplateStr}\n`,
-            el.createDiv(),
-
-            "",
-            this.plugin
+          MarkdownRenderer.render(this.app, `## ${t("Snapshot preview")}\n${ssLinkTemplateStr}\n`, el.createDiv(), "", this.plugin);
+        })
+      );
+    };
+    const updateTranscriptTemplatePreview = () => {
+      const transcriptTemplateStr = subtitlePlaceholder
+        .map((entry, i) => {
+          return formatSubText(8552 * 1000, entry, i, { mediaPath: "", subPath: "", subDelay: null }, this.plugin.settings.transcriptTemplate).replaceAll(
+            "{{snapshot}}",
+            ssLinkStr
           );
+        })
+        .join("\n");
+
+      transcriptTemplatePreview.setName(
+        createFragment((el) => {
+          MarkdownRenderer.render(this.app, `## ${t("Transcript preview")}\n${transcriptTemplateStr}\n`, el.createDiv(), "", this.plugin);
         })
       );
     };
@@ -231,7 +281,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
       let vlcPathToggle: ToggleComponent;
       const selectVLC = new Setting(containerEl)
         .setName(t("VLC path"))
-        // .setName("Seçili .exe dosyasını kullan")
         .setDesc(t("Select 'vlc.exe' from the folder where VLC Player is installed"))
         // auto-detect path
         .addButton((btn) => {
@@ -273,25 +322,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
             .setDisabled(this.plugin.settings.commandPath !== "vlcPath")
             .setButtonText(t("Select vlc.exe"))
             .onClick(() => {
-              // const input = document.createElement("input");
-              // input.setAttribute("type", "file");
-              // input.accept = ".exe";
-              // input.onchange = async (e: Event) => {
-              //   const files = (e.target as HTMLInputElement)?.files as FileList;
-              //   // for (let i = 0; i < files.length; i++) {
-              //   const file = files[0];
-
-              //   this.plugin.settings.vlcPath = file.path;
-              //   selectVLCDescEl.innerText = file.path;
-              //   await this.plugin.saveSettings();
-              //   setSettingDesc();
-
-              //   input.remove();
-              //   // }
-              // };
-
-              // input.click();
-
               window.electron.remote.dialog
                 .showOpenDialog({
                   title: t("Select vlc.exe"),
@@ -491,8 +521,17 @@ export class VBPluginSettingsTab extends PluginSettingTab {
           this.display();
         })
       );
-    // const tsTemplatePreview = containerEl.createDiv();
+    new Setting(containerEl).setName(t("Show timestamp preview")).addToggle((toggle) => {
+      toggle.onChange((value) => {
+        if (value) {
+          tsTemplatePreview.settingEl.show();
+        } else {
+          tsTemplatePreview.settingEl.hide();
+        }
+      });
+    });
     const tsTemplatePreview = new Setting(containerEl);
+    tsTemplatePreview.settingEl.hide();
 
     containerEl.createEl("h2", { text: t("Snapshot embed") });
 
@@ -507,6 +546,9 @@ export class VBPluginSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
             setSettingDesc();
             updateTemplatePreviews();
+            if (this.plugin.settings.transcriptTemplate.includes("{{snapshot}}")) {
+              updateTranscriptTemplatePreview();
+            }
           });
         text.inputEl.addClasses(["vlc-bridge-text-input", "linktext"]);
       })
@@ -555,8 +597,116 @@ export class VBPluginSettingsTab extends PluginSettingTab {
         })
       );
 
-    // const ssTemplatePreview = containerEl.createDiv();
+    new Setting(containerEl).setName(t("Show snapshot preview")).addToggle((toggle) => {
+      toggle.onChange((value) => {
+        if (value) {
+          ssTemplatePreview.settingEl.show();
+        } else {
+          ssTemplatePreview.settingEl.hide();
+        }
+      });
+    });
     const ssTemplatePreview = new Setting(containerEl);
+    ssTemplatePreview.settingEl.hide();
+
+    containerEl.createEl("h2", { text: t("Transcript view") });
+
+    const transcriptTemplateSetting = new Setting(containerEl);
+    transcriptTemplateSetting
+      .setName(t("Transcript template"))
+
+      .addTextArea((text) => {
+        text
+          .setPlaceholder(this.plugin.settings.transcriptTemplate)
+          .setValue(this.plugin.settings.transcriptTemplate)
+          .onChange(async (value) => {
+            this.plugin.settings.transcriptTemplate = value;
+            await this.plugin.saveSettings();
+            setSettingDesc();
+            updateTranscriptTemplatePreview();
+          });
+
+        text.inputEl.cols = 50;
+        text.inputEl.rows = 5;
+
+        return text;
+      })
+      .addExtraButton((button) =>
+        button.setIcon("lucide-rotate-ccw").onClick(async () => {
+          this.plugin.settings.transcriptTemplate = DEFAULT_SETTINGS.transcriptTemplate;
+          await this.plugin.saveSettings();
+          this.display();
+        })
+      );
+
+    new Setting(containerEl).setName(t("Show transcript preview")).addToggle((toggle) => {
+      toggle.onChange((value) => {
+        if (value) {
+          transcriptTemplatePreview.settingEl.show();
+        } else {
+          transcriptTemplatePreview.settingEl.hide();
+        }
+      });
+    });
+    const transcriptTemplatePreview = new Setting(containerEl);
+    transcriptTemplatePreview.settingEl.hide();
+
+    new Setting(containerEl)
+      .setName(t("Keep transcript view when app closed"))
+      .setDesc(
+        createFragment((el) => {
+          MarkdownRenderer.render(
+            this.app,
+            `>[!warning] \n>${t(
+              `“Transcript View” tabs that you opened will be saved and then will re-open them the next time you launch Obsidian. If it takes a long time to load or may crash Obsidian, it is not recommended to use this feature.`
+            )}`,
+            el.createDiv(),
+            "",
+            this.plugin
+          );
+        })
+      )
+      .addToggle((toggle) => {
+        toggle.setValue(this.plugin.settings.keepTranscriptViews).onChange((value) => {
+          this.plugin.settings.keepTranscriptViews = value;
+          this.plugin.saveSettings();
+        });
+      });
+    new Setting(containerEl)
+      .setName(t("Use simplier format in transcript view"))
+      .setDesc(t("If loading tab with your template takes a while, it is recommended to use this option. Original template will be used again when you copy the dialog."))
+      .addToggle((toggle) => {
+        toggle.setValue(this.plugin.settings.useSimplierTranscriptFormat).onChange((value) => {
+          this.plugin.settings.useSimplierTranscriptFormat = value;
+          this.plugin.saveSettings();
+        });
+      });
+    new Setting(containerEl)
+      .setName(t("Search only in dialog texts"))
+      .setDesc(t("If you do not want to include all content when using the search feature, use this option."))
+      .addToggle((toggle) => {
+        toggle.setValue(this.plugin.settings.onlySearchWithinTextInTranscriptView).onChange((value) => {
+          this.plugin.settings.onlySearchWithinTextInTranscriptView = value;
+          this.plugin.saveSettings();
+        });
+      });
+    new Setting(containerEl)
+      .setName(t("Take snapshot in the middle of the dialog"))
+      .setDesc(t("If your transcript template contains {{snapshot}}, jump to the middle of the dialog instead of the beginning to capture this snapshot."))
+      .addToggle((toggle) => {
+        toggle.setValue(this.plugin.settings.jumpMiddleOfDialog).onChange((value) => {
+          this.plugin.settings.jumpMiddleOfDialog = value;
+          this.plugin.saveSettings();
+        });
+      });
+    new Setting(containerEl)
+      .setName(t("List all snapshots from the start of dialog to the start of the next dialog for the {{snapshot}} value in the transcript template"))
+      .addToggle((toggle) => {
+        toggle.setValue(this.plugin.settings.showAllSnapshotsInRange).onChange((value) => {
+          this.plugin.settings.showAllSnapshotsInRange = value;
+          this.plugin.saveSettings();
+        });
+      });
 
     new Setting(containerEl).setName(t("Seeking amounts")).setHeading();
 
@@ -620,7 +770,8 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     new Setting(containerEl).setName(t("Snapshot")).setHeading();
 
     const folderNamePattern = /^[A-Za-z0-9][^\\\<\>\"\*\:\|\?]*$/gi;
-    this.lastSnapshotPath = this.plugin.settings.snapshotFolder;
+    this.lastSnapshotPath = this.plugin.settings.snapshotFolder.toString();
+    this.lasttranscriptTemplate = this.plugin.settings.transcriptTemplate.toString();
     new Setting(containerEl)
       .setName(t("Snapshot folder"))
       .setDesc(t("Enter the folder name where snapshots will be saved in the vault"))
@@ -747,7 +898,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
                 new Notice(t("Failed to detect the installation location of {{1}}. Please try selecting it manually.", ["Syncplay"]));
               }
             } catch (err) {
-              // selectVLCBtnEl.setButtonText("hoop");
               selectSPBtnEl.setWarning();
               new Notice(t("Failed to detect the installation location of {{1}}. Please try selecting it manually.", ["Syncplay"]));
               console.error(`Error: ${err.message}`);
@@ -761,25 +911,6 @@ export class VBPluginSettingsTab extends PluginSettingTab {
             .setButtonText(t("Select Syncplay.exe"))
 
             .onClick(() => {
-              // const input = document.createElement("input");
-              // input.setAttribute("type", "file");
-              // input.accept = ".exe";
-              // input.onchange = async (e: Event) => {
-              //   const files = (e.target as HTMLInputElement)?.files as FileList;
-              //   for (let i = 0; i < files.length; i++) {
-              //     const file = files[i];
-
-              //     this.plugin.settings.syncplayPath = file.path;
-              //     selectSPDescEl.innerText = file.path;
-              //     await this.plugin.saveSettings();
-              //     setSettingDesc();
-
-              //     input.remove();
-              //   }
-              // };
-
-              // input.click();
-
               window.electron.remote.dialog
                 .showOpenDialog({
                   title: t("Select Syncplay.exe"),
@@ -863,8 +994,14 @@ export class VBPluginSettingsTab extends PluginSettingTab {
 
     setSettingDesc();
     updateTemplatePreviews();
+    updateTranscriptTemplatePreview();
   }
   hide() {
+    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_VB);
+    if (leaves.length > 0 && this.lasttranscriptTemplate !== this.plugin.settings.transcriptTemplate) {
+      new Notice(t("You have changed your transcript template. To update the template used in currently open transcript views, use the ‘Reload’ button."), 60 * 1000);
+    }
+
     const updateSnapshotFolder = async () => {
       if ((await this.plugin.app.vault.adapter.exists(this.lastSnapshotPath)) && !(await this.plugin.app.vault.adapter.exists(this.plugin.settings.snapshotFolder))) {
         await this.plugin.app.vault.adapter.rename(this.lastSnapshotPath, this.plugin.settings.snapshotFolder);
