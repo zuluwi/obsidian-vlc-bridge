@@ -1,18 +1,4 @@
-import {
-  Editor,
-  ExtraButtonComponent,
-  MarkdownRenderer,
-  MarkdownView,
-  Notice,
-  ObsidianProtocolData,
-  Platform,
-  Plugin,
-  ProgressBarComponent,
-  requestUrl,
-  RequestUrlResponse,
-  TFile,
-  WorkspaceLeaf,
-} from "obsidian";
+import { Editor, ExtraButtonComponent, MarkdownRenderer, MarkdownView, Notice, ObsidianProtocolData, Platform, Plugin, ProgressBarComponent, TFile, WorkspaceLeaf } from "obsidian";
 import { DEFAULT_SETTINGS, VBPluginSettingsTab, VBPluginSettings } from "./settings";
 import { passPlugin, currentConfig, currentMedia, vlcStatusResponse, plObject, vlcRequestResponse } from "./vlcHelper";
 import { t } from "./language/helpers";
@@ -20,7 +6,7 @@ import extensionList from "./extensionList";
 import { fileURLToPath } from "url";
 import * as path from "path";
 const commandExistsSync = require("command-exists").sync;
-import { getSubEntries, ISubEntry, msToTimestamp, parseSub, supportedSubtitleFormats } from "./subtitleParser";
+import { getSubEntries, ISubEntry, msToTimestamp, supportedSubtitleFormats } from "./subtitleParser";
 import { IDialogEntry, ITranscriptViewState, TranscriptView, VIEW_TYPE_VB } from "./transcriptView";
 
 declare global {
@@ -136,15 +122,15 @@ export default class VLCBridgePlugin extends Plugin {
       icon: "lucide-captions",
       name: t("Open transcript view"),
       callback: async () => {
-        let currentSub = await this.checkSubtitles();
+        const currentSub = await this.checkSubtitles();
         if (!currentSub) {
           return;
         } else {
-          let subExt = path.extname(currentSub.currentMedia.subtitlePath as string);
+          const subExt = path.extname(currentSub.currentMedia.subtitlePath as string);
           if (!supportedSubtitleFormats.includes(subExt)) {
             return new Notice(`${t("Unsupported subtitle extension")}: ${subExt}`);
           }
-          let lengthInfo = await this.getLength({ mediaPath: currentMedia.mediaPath });
+          const lengthInfo = await this.getLength({ mediaPath: currentMedia.mediaPath });
           if (lengthInfo?.status) {
             this.activateView(
               lengthInfo.length,
@@ -306,14 +292,14 @@ export default class VLCBridgePlugin extends Plugin {
     parsingParams?: { subPath: string; mediaPath: string; type: "current" | "all" };
     parsedEntries?: { entries: IDialogEntry[] | ISubEntry[] | null; filename: string; length: number; subPath: string; mediaPath: string; subDelay?: number | null };
   }) {
-    let beforeProcess = Date.now();
+    const beforeProcess = Date.now();
     let length: number | undefined;
     let status: vlcStatusResponse | undefined;
     if (params.parsedEntries?.length) {
       length = params.parsedEntries.length;
       status = await this.getStatus();
     } else {
-      let lengthRes = await this.getLength({ mediaPath: params?.parsingParams?.mediaPath || params.parsedEntries?.mediaPath });
+      const lengthRes = await this.getLength({ mediaPath: params?.parsingParams?.mediaPath || params.parsedEntries?.mediaPath });
       length = lengthRes?.length;
       status = lengthRes?.status;
     }
@@ -321,7 +307,7 @@ export default class VLCBridgePlugin extends Plugin {
       new Notice(t("Failed to take a snapshot for transcript"));
       return;
     }
-    let currentFilename = status.information.category.meta.filename;
+    const currentFilename = status.information.category.meta.filename;
     // let lastPosition;
     if (params.parsedEntries?.filename && params.parsedEntries?.filename !== currentFilename) {
       new Notice(t("Different video is now playing. To take a snapshot, open the video with the copied subtitles."));
@@ -335,7 +321,7 @@ export default class VLCBridgePlugin extends Plugin {
 
     let subEntries: IDialogEntry[] | ISubEntry[] | null | undefined;
     if (params.parsingParams) {
-      let { subPath, mediaPath, type } = params.parsingParams;
+      const { subPath, mediaPath, type } = params.parsingParams;
       subEntries = getSubEntries({
         length: { length: length, currentPos: type == "current" ? status.position : null },
         mediaPath: mediaPath,
@@ -348,12 +334,12 @@ export default class VLCBridgePlugin extends Plugin {
     }
 
     const snapshotPlaceholder = "{{snapshot}}";
-    let newSubEntries: string[] = [];
+    const newSubEntries: string[] = [];
     let formattedStr: string;
     if (subEntries?.length && this.settings.transcriptTemplate.includes(snapshotPlaceholder)) {
       let continueToSnapshot = true;
 
-      let finishingTimes: number[] = [];
+      const finishingTimes: number[] = [];
       const average = (array: number[]) => array.reduce((a, b) => a + b) / array.length;
       const progressNotice = new Notice(`0/${subEntries.length}`, 0);
 
@@ -492,15 +478,15 @@ export default class VLCBridgePlugin extends Plugin {
   }
 
   getSnapshot = async (params: { timestamp?: number; originalFilename?: string; milliseconds?: number }) => {
-    let { timestamp, originalFilename, milliseconds } = params;
-    let length:
-      | {
-          length: number;
-          currentPos: number;
-          currentPosAsMs: number;
-          status: vlcStatusResponse;
-        }
-      | undefined;
+    const { timestamp, originalFilename, milliseconds } = params;
+    // let length:
+    //   | {
+    //       length: number;
+    //       currentPos: number;
+    //       currentPosAsMs: number;
+    //       status: vlcStatusResponse;
+    //     }
+    //   | undefined;
     const timestampStr = `${timestamp}%25`;
     if (currentConfig.snapshotFolder && !(await this.app.vault.adapter.exists(currentConfig.snapshotFolder))) {
       this.app.vault.adapter.mkdir(currentConfig.snapshotFolder);
@@ -572,11 +558,10 @@ export default class VLCBridgePlugin extends Plugin {
       }
       const afterReq = Date.now();
 
-      let snapshot: TFile | undefined;
-      snapshot = await this.findSnapshotFile(beforeReq, afterReq);
+      const snapshot = await this.findSnapshotFile(beforeReq, afterReq);
       if (snapshot) {
         if (!milliseconds) {
-          let length = await this.getLength({});
+          const length = await this.getLength({});
           milliseconds = Math.round((length?.length as number) * response.json.position * 1000);
         }
         const timestampLink = await this.getTimestampLink(response.json, "snapshot");
@@ -693,16 +678,16 @@ export default class VLCBridgePlugin extends Plugin {
 
     if (matches && matches.groups) {
       let milliseconds = 0;
-      let hh = Number(matches.groups.hh);
+      const hh = Number(matches.groups.hh);
       milliseconds += hh * 60 * 60 * 1000;
-      let mm = Number(matches.groups.mm);
+      const mm = Number(matches.groups.mm);
       milliseconds += mm * 60 * 1000;
-      let ss = Number(matches.groups.ss);
+      const ss = Number(matches.groups.ss);
       milliseconds += ss * 1000;
-      let ms = Number(matches.groups.ms);
+      const ms = Number(matches.groups.ms);
       milliseconds += ms;
 
-      let result = {
+      const result = {
         milliseconds,
         timestamp: msToTimestamp(milliseconds).simplifiedWithoutMs,
         filename: matches.groups.filename,
@@ -901,7 +886,7 @@ export default class VLCBridgePlugin extends Plugin {
   async seekFrame(prefix: "-" | "+") {
     let lenghtRes;
     try {
-      let mediaPath = (await this.getCurrentVideo())?.uri;
+      const mediaPath = (await this.getCurrentVideo())?.uri;
       lenghtRes = await this.getLength({ mediaPath });
       if (!(lenghtRes && lenghtRes.status)) {
         return new Notice(t("VLC Player must be open to use this command"));

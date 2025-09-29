@@ -46,7 +46,7 @@ export const getSubEntries = (params: {
   subDelay: number | null;
   template: string;
 }) => {
-  let { length, subPath, mediaPath, subDelay, template } = params;
+  const { length, subPath, mediaPath, subDelay, template } = params;
   const length_ = length.length;
   const currentPos = length.currentPos;
 
@@ -55,8 +55,8 @@ export const getSubEntries = (params: {
     new Notice(`${t("Unsupported subtitle extension")}: ${subExt}`);
     return null;
   }
-  let subEntries = parseSub(subPath);
-  let formattedEntries: ISubEntry[] = [];
+  const subEntries = parseSub(subPath);
+  const formattedEntries: ISubEntry[] = [];
   subEntries
     // ?.slice(0, 15) // for test
     ?.forEach((e, i, arr) => {
@@ -83,7 +83,7 @@ export const getSubEntries = (params: {
 
 export const parseSub = (subPath: string) => {
   let entries: Entry[];
-  let subtitleString = readFileSync(subPath).toString();
+  const subtitleString = readFileSync(subPath).toString();
   // let subtitleBuffer = readFileSync(subPath);
   // let subtitleEncoding = jschardet.detect(subtitleBuffer);
   // let subtitleString = iconv.decode(subtitleBuffer, subtitleEncoding.encoding);
@@ -118,7 +118,7 @@ export const formatSubText = (
   const placeholderFrom = "{{from}}";
   const placeholderTo = "{{to}}";
 
-  let params: { mediaPath: string; subPath: string; subDelay?: string } = {
+  const params: { mediaPath: string; subPath: string; subDelay?: string } = {
     mediaPath: encodeURIComponent(linkparams.mediaPath),
     subPath: encodeURIComponent(linkparams.subPath),
   };
@@ -168,13 +168,13 @@ export const formatSubText = (
 // https://stackoverflow.com/a/25279399
 export const msToTimestamp = (milliseconds: number) => {
   milliseconds = Math.round(milliseconds);
-  let seconds = (milliseconds / 1000).toString().split(".")[0];
-  let ms = Math.round(((milliseconds / 1000) % 1) * 1000)
+  const seconds = (milliseconds / 1000).toString().split(".")[0];
+  const ms = Math.round(((milliseconds / 1000) % 1) * 1000)
     .toString()
     ?.slice(0, 3);
-  let date = new Date(0);
+  const date = new Date(0);
   date.setSeconds(Number(seconds), Number(ms || 0)); // specify value for SECONDS here
-  let timeString = date.toISOString().substring(11, 23);
+  const timeString = date.toISOString().substring(11, 23);
   const simplifiedStr = timeString.substring(milliseconds < 60 * 60 * 1000 ? 3 : 0);
   const result = {
     fullString: timeString,
@@ -190,14 +190,14 @@ export const msToTimestamp = (milliseconds: number) => {
 };
 
 const parseAssSub = (subtitleStr: string) => {
-  let parsedAss: IParsedAssElements[] = parseAss(subtitleStr);
-  let events = (parsedAss.find((e) => e.section == "Events") as IParsedAssElements).body;
-  let mappedEntries = events
+  const parsedAss: IParsedAssElements[] = parseAss(subtitleStr);
+  const events = (parsedAss.find((e) => e.section == "Events") as IParsedAssElements).body;
+  const mappedEntries = events
     .filter((e) => e.key == "Dialogue")
     .map((e) => {
       // Source https://javascript.plainenglish.io/june-3-parsing-and-validating-svg-paths-with-regex-7bd0e245115
       const isSVGPath = /[ -\dmlhvcsqtaz]{10,}/g;
-      let editedText = e.value.Text.replaceAll(isSVGPath, "")
+      const editedText = e.value.Text.replaceAll(isSVGPath, "")
         .replaceAll(/\\[Nn]/g, "\n") // line break
         // .replaceAll(/{\\i[01]}/g, "*") // italic
         // .replaceAll(/{\\b\d+}/g, "**") // bold

@@ -3,7 +3,6 @@ import {
   IconName,
   ItemView,
   MarkdownRenderer,
-  MarkdownView,
   Menu,
   normalizePath,
   Notice,
@@ -15,10 +14,9 @@ import {
   ViewStateResult,
   WorkspaceLeaf,
 } from "obsidian";
-import { formatSubText, getSubEntries, ISubEntry, msToTimestamp } from "./subtitleParser";
+import { formatSubText, getSubEntries, ISubEntry } from "./subtitleParser";
 import VLCBridgePlugin from "./main";
 import * as path from "path";
-import { DEFAULT_SETTINGS } from "./settings";
 import { t } from "./language/helpers";
 
 declare module "obsidian" {
@@ -158,15 +156,15 @@ export class TranscriptView extends ItemView {
     });
     if (!subEntries) return;
     const dialogsView = subEntries.map((entry, i, arr) => {
-      let entryEl = transcriptEl.createDiv();
-      let dialogEl = entryEl.createDiv({ cls: "vlc-bridge-ts-dialog" });
-      let dialogOptEl = dialogEl.createDiv({ cls: "vlc-bridge-ts-dialog-options" });
-      let dialogOptions = this.setDialogOptions(dialogOptEl, i);
-      let dialogTextEl = dialogEl.createDiv({ cls: "vlc-bridge-ts-dialog-text" });
+      const entryEl = transcriptEl.createDiv();
+      const dialogEl = entryEl.createDiv({ cls: "vlc-bridge-ts-dialog" });
+      const dialogOptEl = dialogEl.createDiv({ cls: "vlc-bridge-ts-dialog-options" });
+      const dialogOptions = this.setDialogOptions(dialogOptEl, i);
+      const dialogTextEl = dialogEl.createDiv({ cls: "vlc-bridge-ts-dialog-text" });
       entryEl.createEl("hr", { cls: "vlc-bridge-ts-separator" });
 
       const getDialogView = (reload: boolean, snapshotFiles?: TFile[] | undefined) => {
-        let dialogEntry = this.dialogsView?.[i] || entry;
+        const dialogEntry = this.dialogsView?.[i] || entry;
         if (reload) {
           dialogEntry.formattedStr = formatSubText(
             this.length * 1000,
@@ -196,7 +194,7 @@ export class TranscriptView extends ItemView {
             });
           }
         }
-        let renderedDialog = createFragment((el) => {
+        const renderedDialog = createFragment((el) => {
           MarkdownRenderer.render(
             this.app,
             this.plugin.settings.useSimplierTranscriptFormat ? dialogEntry.simpleFormattedStr : dialogEntry.formattedStr.replaceAll("{{snapshot}}", ""),
@@ -300,7 +298,7 @@ export class TranscriptView extends ItemView {
   }
 
   setDialogOptions(dialogOptEl: HTMLDivElement, i: number) {
-    let checkbox: ToggleComponent = new ToggleComponent(dialogOptEl).setValue(false);
+    const checkbox: ToggleComponent = new ToggleComponent(dialogOptEl).setValue(false);
     checkbox.toggleEl.addClass("mod-small");
 
     new ExtraButtonComponent(dialogOptEl)
@@ -329,10 +327,10 @@ export class TranscriptView extends ItemView {
       });
 
     const updateRange = () => {
-      let startMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "start");
-      let endMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "end");
-      let start = Math.min(startMarker, endMarker);
-      let end = Math.max(startMarker, endMarker);
+      const startMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "start");
+      const endMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "end");
+      const start = Math.min(startMarker, endMarker);
+      const end = Math.max(startMarker, endMarker);
       this.dialogsView.forEach((e, i) => {
         if (i < start || i > end) {
           e.setRangeBtn.extraSettingsEl.removeClass("mod-warning");
@@ -343,7 +341,7 @@ export class TranscriptView extends ItemView {
         }
       });
     };
-    let setRangeBtn: ExtraButtonComponent = new ExtraButtonComponent(dialogOptEl).setIcon("chevrons-left-right-ellipsis").setTooltip(t("Adjust range"));
+    const setRangeBtn: ExtraButtonComponent = new ExtraButtonComponent(dialogOptEl).setIcon("chevrons-left-right-ellipsis").setTooltip(t("Adjust range"));
     setRangeBtn.extraSettingsEl.onclick = async (event) => {
       const menu = new Menu();
 
@@ -355,7 +353,7 @@ export class TranscriptView extends ItemView {
             if (this.dialogsView[i].rangeMarker !== null) {
               return;
             }
-            let currentMarker = this.dialogsView.find((e) => e.rangeMarker == "start");
+            const currentMarker = this.dialogsView.find((e) => e.rangeMarker == "start");
             if (currentMarker) {
               currentMarker.rangeMarker = null;
             }
@@ -372,7 +370,7 @@ export class TranscriptView extends ItemView {
             if (this.dialogsView[i].rangeMarker !== null) {
               return;
             }
-            let currentMarker = this.dialogsView.find((e) => e.rangeMarker == "end");
+            const currentMarker = this.dialogsView.find((e) => e.rangeMarker == "end");
             if (currentMarker) {
               currentMarker.rangeMarker = null;
             }
@@ -459,7 +457,7 @@ export class TranscriptView extends ItemView {
           .setTitle(t("Copy selected dialogs"))
           .setIcon("list-todo")
           .onClick(async () => {
-            let selectedDialogs = this.dialogsView.filter((e) => e.checkbox.getValue());
+            const selectedDialogs = this.dialogsView.filter((e) => e.checkbox.getValue());
             let formattedStr;
             if (selectedDialogs) {
               if (selectedDialogs.first()?.formattedStr.includes("{{snapshot}}")) {
@@ -488,12 +486,12 @@ export class TranscriptView extends ItemView {
           .setTitle(t("Copy dialogs in range"))
           .setIcon("logs")
           .onClick(async () => {
-            let startMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "start");
-            let endMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "end");
-            let start = Math.min(startMarker, endMarker);
-            let end = Math.max(startMarker, endMarker);
+            const startMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "start");
+            const endMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "end");
+            const start = Math.min(startMarker, endMarker);
+            const end = Math.max(startMarker, endMarker);
 
-            let selectedDialogs = this.dialogsView.slice(start || 0, (end || this.dialogsView.length - 1) + 1);
+            const selectedDialogs = this.dialogsView.slice(start || 0, (end || this.dialogsView.length - 1) + 1);
             let formattedStr;
             if (selectedDialogs) {
               if (selectedDialogs[0].formattedStr.includes("{{snapshot}}")) {
@@ -556,10 +554,10 @@ export class TranscriptView extends ItemView {
           .setTitle(t("Select in range"))
           .setIcon("list-checks")
           .onClick(() => {
-            let startMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "start");
-            let endMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "end");
-            let start = Math.min(startMarker, endMarker);
-            let end = Math.max(startMarker, endMarker);
+            const startMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "start");
+            const endMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "end");
+            const start = Math.min(startMarker, endMarker);
+            const end = Math.max(startMarker, endMarker);
             this.dialogsView.forEach((e, i) => {
               if (i >= start && i <= end) {
                 e.checkbox.setValue(true);
@@ -572,10 +570,10 @@ export class TranscriptView extends ItemView {
           .setTitle(t("Deselect in range"))
           .setIcon("layout-list")
           .onClick(() => {
-            let startMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "start");
-            let endMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "end");
-            let start = Math.min(startMarker, endMarker);
-            let end = Math.max(startMarker, endMarker);
+            const startMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "start");
+            const endMarker = this.dialogsView.findIndex((e) => e.rangeMarker == "end");
+            const start = Math.min(startMarker, endMarker);
+            const end = Math.max(startMarker, endMarker);
             this.dialogsView.forEach((e, i) => {
               if (i >= start && i <= end) {
                 e.checkbox.setValue(false);
@@ -591,9 +589,9 @@ export class TranscriptView extends ItemView {
     const status = (await this.plugin.sendVlcRequest(""))?.json;
     if (status?.position && (await this.plugin.getCurrentVideo())?.uri == this.mediaPath) {
       const currentPos = status?.position;
-      let positionMs = Math.round(this.length * currentPos * 1000);
+      const positionMs = Math.round(this.length * currentPos * 1000);
 
-      let currentDialog = this.dialogsView.find((e, i, arr) => (e.from <= positionMs && i + 1 < arr.length ? positionMs < arr[i + 1]?.from : true));
+      const currentDialog = this.dialogsView.find((e, i, arr) => (e.from <= positionMs && i + 1 < arr.length ? positionMs < arr[i + 1]?.from : true));
       if (currentDialog) {
         if (type == "jump") {
           currentDialog.dialogEl.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -735,11 +733,11 @@ export class TranscriptView extends ItemView {
       );
     };
 
-    let markClass = "vlc-bridge-ts-dialog-search";
+    const markClass = "vlc-bridge-ts-dialog-search";
     const searchMatches: HTMLSpanElement[] = [];
-    let regex = this.searchRegex;
+    const regex = this.searchRegex;
     this.dialogsView.forEach((dialog) => {
-      let viewedStr = this.plugin.settings.useSimplierTranscriptFormat ? dialog.simpleFormattedStr : dialog.formattedStr.replaceAll("{{snapshot}}", "");
+      const viewedStr = this.plugin.settings.useSimplierTranscriptFormat ? dialog.simpleFormattedStr : dialog.formattedStr.replaceAll("{{snapshot}}", "");
       if (!clear && regex.source.length > 2 && viewedStr.match(regex)) {
         let highlightedText = viewedStr.toString();
         if (this.plugin.settings.onlySearchWithinTextInTranscriptView) {
@@ -752,7 +750,7 @@ export class TranscriptView extends ItemView {
           highlightedText = highlightedText.replaceAll(regex, `<span class="${markClass}">$1</span>`);
         }
 
-        let highlightedEl = createFragment((el) => {
+        const highlightedEl = createFragment((el) => {
           MarkdownRenderer.render(this.app, highlightedText, el.createDiv(), "", this);
         });
         (dialog.dialogTextEl.firstChild as HTMLDivElement).replaceWith(highlightedEl);
@@ -768,7 +766,7 @@ export class TranscriptView extends ItemView {
     this.searchMatches.spanArr = searchMatches;
     this.searchMatches.matchedRegex = regex;
     if (this.searchMatches.spanArr.length) {
-      let indexOfSpanAtView = this.searchMatches.spanArr.findIndex((e) => isElementInViewport(e));
+      const indexOfSpanAtView = this.searchMatches.spanArr.findIndex((e) => isElementInViewport(e));
 
       this.focusMatch(indexOfSpanAtView == -1 ? 0 : indexOfSpanAtView, indexOfSpanAtView == -1 ? true : false);
     } else {
@@ -776,7 +774,7 @@ export class TranscriptView extends ItemView {
     }
   }
   focusMatch(index: number, scroll: boolean, curentIndex_?: number) {
-    let currentIndex = curentIndex_ || this.searchMatches.spanArr.findIndex((e) => e.hasClass("current"));
+    const currentIndex = curentIndex_ || this.searchMatches.spanArr.findIndex((e) => e.hasClass("current"));
     if (currentIndex !== -1) {
       this.searchMatches.spanArr[currentIndex].removeClass("current");
     }

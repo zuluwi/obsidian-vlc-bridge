@@ -233,8 +233,8 @@ export function passPlugin(plugin: VLCBridgePlugin) {
       return encodeURI(timestamp);
     }
     if (timecodePattern.test(timestamp)) {
-      let seconds = timestampToSeconds(timestamp);
-      let length = (await getLength({ dontBackCurrentPos: true, onlyGetLength: true, mediaPath }))?.length;
+      const seconds = timestampToSeconds(timestamp);
+      const length = (await getLength({ dontBackCurrentPos: true, onlyGetLength: true, mediaPath }))?.length;
 
       if (length) {
         return encodeURI(`${(seconds / length) * 100}%`);
@@ -514,8 +514,8 @@ export function passPlugin(plugin: VLCBridgePlugin) {
   };
 
   const getLength = async (params: { mediaPath?: string | null; onlyGetLength?: boolean; dontBackCurrentPos?: boolean }) => {
-    let { mediaPath, onlyGetLength, dontBackCurrentPos } = params;
-    let existingLengthData = temporaryLengthData.find((e) => e.mediaPath == mediaPath && e.length);
+    const { mediaPath, onlyGetLength, dontBackCurrentPos } = params;
+    const existingLengthData = temporaryLengthData.find((e) => e.mediaPath == mediaPath && e.length);
     if (onlyGetLength && existingLengthData) {
       return { length: existingLengthData.length };
     }
@@ -564,7 +564,7 @@ export const timestampToSeconds = (timestamp: string) => {
   const s = Number(hhmmss.at(-1)?.replace(",", ".") || 0);
   const mmToSeconds = Number(hhmmss.at(-2) || 0) * 60;
   const hhToSeconds = Number(hhmmss.at(-3) || 0) * 60 * 60;
-  let seconds = s + mmToSeconds + hhToSeconds;
+  const seconds = s + mmToSeconds + hhToSeconds;
 
   return seconds;
 };
