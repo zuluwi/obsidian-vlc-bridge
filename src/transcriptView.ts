@@ -460,7 +460,7 @@ export class TranscriptView extends ItemView {
             const selectedDialogs = this.dialogsView.filter((e) => e.checkbox.getValue());
             let formattedStr;
             if (selectedDialogs) {
-              if (selectedDialogs.first()?.formattedStr.includes("{{snapshot}}")) {
+              if (selectedDialogs.some((e) => e.formattedStr.includes("{{snapshot}}"))) {
                 formattedStr = await this.plugin.getSubWithSnapshots({
                   parsedEntries: {
                     entries: selectedDialogs,
@@ -494,7 +494,7 @@ export class TranscriptView extends ItemView {
             const selectedDialogs = this.dialogsView.slice(start || 0, (end || this.dialogsView.length - 1) + 1);
             let formattedStr;
             if (selectedDialogs) {
-              if (selectedDialogs[0].formattedStr.includes("{{snapshot}}")) {
+              if (selectedDialogs.some((e) => e.formattedStr.includes("{{snapshot}}"))) {
                 formattedStr = await this.plugin.getSubWithSnapshots({
                   parsedEntries: {
                     entries: selectedDialogs,
