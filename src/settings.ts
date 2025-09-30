@@ -70,7 +70,7 @@ export const DEFAULT_SETTINGS: VBPluginSettings = {
   keepTranscriptViews: false,
   useSimplierTranscriptFormat: false,
   onlySearchWithinTextInTranscriptView: true,
-  jumpMiddleOfDialog: false,
+  jumpMiddleOfDialog: true,
   showAllSnapshotsInRange: false,
   transcriptTemplate: "{{index}}. {{from}} >> {{to}}\n{{text}}",
 };
@@ -164,7 +164,7 @@ export class VBPluginSettingsTab extends PluginSettingTab {
     let placeholderTimestamp: string | undefined;
 
     if (snapshots.length > 0) {
-      placeholderSnapshot = snapshots[Math.round(Math.random() * snapshots.length - 1)];
+      placeholderSnapshot = snapshots[Math.floor(Math.random() * snapshots.length)];
       placeholderFilename = this.plugin.snapshotPathToMs(placeholderSnapshot.path)?.filename;
       placeholderTimestamp = this.plugin.snapshotPathToMs(placeholderSnapshot.path)?.timestamp;
     }

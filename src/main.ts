@@ -136,10 +136,9 @@ export default class VLCBridgePlugin extends Plugin {
               lengthInfo.length,
               currentMedia.subtitlePath as string,
               currentMedia.mediaPath as string,
-              path
-                .basename(currentSub.currentFile.uri)
-                .replaceAll("[", "［") // prevent wikilinks
-                .replaceAll("]", "］"),
+              path.basename(currentSub.currentFile.uri),
+              // .replaceAll("[", "［") // prevent wikilinks
+              // .replaceAll("]", "］"),
               lengthInfo.status.subtitledelay
             );
           }
