@@ -514,7 +514,10 @@ export function passPlugin(plugin: VLCBridgePlugin) {
   };
 
   const getLength = async (params: { mediaPath?: string | null; onlyGetLength?: boolean; dontBackCurrentPos?: boolean }) => {
-    const { mediaPath, onlyGetLength, dontBackCurrentPos } = params;
+    let { mediaPath, onlyGetLength, dontBackCurrentPos } = params;
+    if (!mediaPath) {
+      mediaPath = (await getCurrentVideo())?.uri;
+    }
     const existingLengthData = temporaryLengthData.find((e) => e.mediaPath == mediaPath && e.length);
     if (onlyGetLength && existingLengthData) {
       return { length: existingLengthData.length };
@@ -544,7 +547,6 @@ export function passPlugin(plugin: VLCBridgePlugin) {
     }
 
     const currentPosAsMs = length * currentPos * 1000;
-
     if (mediaPath && !existingLengthData) {
       temporaryLengthData.push({ mediaPath, length });
     }
