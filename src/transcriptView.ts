@@ -521,7 +521,7 @@ export class TranscriptView extends ItemView {
           .setIcon("list-plus")
           .onClick(async () => {
             let formattedStr;
-            if (this.dialogsView.first()?.formattedStr.includes("{{snapshot}}")) {
+            if (this.dialogsView.some((e) => e.formattedStr.includes("{{snapshot}}"))) {
               formattedStr = await this.plugin.getSubWithSnapshots({
                 parsedEntries: {
                   entries: this.dialogsView,
