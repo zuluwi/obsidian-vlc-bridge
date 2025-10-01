@@ -1,7 +1,7 @@
 {
 	"id": "vlc-bridge",
 	"name": "VLC Bridge",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"minAppVersion": "1.4.11",
 	"description": "Take video/movie notes with timestamp links and snapshots from VLC Player.",
 	"author": "zuluwi",
