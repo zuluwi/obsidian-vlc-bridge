@@ -111,6 +111,9 @@ Open the command palette and use the `Open transcript view` command to view the 
 > [!tip]
 > Create a shortcut with the url `obsidian://vlcBridge-runSyncplay` to open Obsidian and then Syncplay
 
+## Contribution
+My knowledge of using Git and collaborative project management is very limited, and I only spend time on this plugin at long gaps. If you have new ideas about the plugin or additions you want to make, please feel free to fork the repository and release a new version. If these changes are related to issues in the repository, please feel free to redirect those who opened the issue to the versions you released. 🙏
+
 ## Attributions
 
 - [Media Extended](https://github.com/PKM-er/media-extended)
